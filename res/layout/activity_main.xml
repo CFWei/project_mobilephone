@@ -10,6 +10,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:orientation="vertical" >
+        
 
         <ListView
             android:id="@+id/listView1"
@@ -18,5 +19,14 @@
         </ListView>
 
     </LinearLayout>
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="79dp"
+        android:text="@string/TakeNumber" />
 
 </RelativeLayout>

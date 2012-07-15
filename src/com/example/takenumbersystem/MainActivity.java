@@ -25,6 +25,8 @@ import org.json.JSONObject;
 
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ListActivity;
@@ -41,71 +43,85 @@ import android.telephony.TelephonyManager;
 
 
 public class MainActivity extends Activity {
-	String ServerURL="http://192.168.20.161/";
+	String ServerURL="http://192.168.0.104/";
 	private String UserIMEI;
-	private SimpleAdapter adapter;
+	public ArrayList<HashMap<String,String>> item_list=null;
+	private Handler main_thread_handler=new Handler();
+	private Handler threadhandler;
+	private HandlerThread mthread;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ArrayList<HashMap<String,String>> item_list=null;
-        
+        check_connect_status();
         UserIMEI=getIMEI();
-        try 
-        {
-			if(connect_to_server("/project/mobilephone/check_connect.php",null).equals("1"))
-				Toast.makeText(this, "connect", Toast.LENGTH_LONG).show();
-			else
-				{
-					Toast.makeText(this, "not connect", Toast.LENGTH_SHORT).show();
-				}
-			ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
-			nameValuePairs.add(new BasicNameValuePair("custom_id",UserIMEI));
-			
-			String get_item_list=connect_to_server("/project/mobilephone/check_item.php",nameValuePairs);
-			//Toast.makeText(this, get_item_list, Toast.LENGTH_SHORT).show();
-			
-			
-			String key[]={"custom_id","store","item","number"};
-			item_list=json_deconde(get_item_list,key);
-			for(int i=0;i<1;i++)
-				{
-					for(int j=0;j<4;j++)
-						Log.v("1",item_list.get(i).get(key[j]));
-				}
-			
-			
-		} 
-        catch (ClientProtocolException e) 
-        {
-			e.printStackTrace();
-		} 
-        catch (IOException e) 
-        {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-       
-        ListView list = (ListView) findViewById(R.id.listView1);
         
-        adapter = new SimpleAdapter( 
-        		 this, 
-        		 item_list,
-        		 android.R.layout.simple_list_item_2,
-        		 new String[] { "store","number" },
-        		 new int[] { android.R.id.text1, android.R.id.text2 } );
-        list.setAdapter(adapter);
+			
+        mthread=new HandlerThread("name");
         
+        mthread.start();
+        
+        threadhandler=new Handler(mthread.getLooper());
+        threadhandler.post(load_item);
+      
        
-    }
 
+    }
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
     }
+    
+    
+    private Runnable load_item=new Runnable()
+    {	
+    	private SimpleAdapter adapter;
+    	public void run()
+    	{	
+           
+			try {
+				
+			    	ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
+			    	nameValuePairs.add(new BasicNameValuePair("custom_id",UserIMEI));
+			    	String get_item_list;
+					get_item_list = connect_to_server("/project/mobilephone/check_item.php",nameValuePairs);
+					String key[]={"custom_id","store","item","number"};
+					item_list=json_deconde(get_item_list,key);
+			    } catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    			
+			 if(item_list!=null)
+			 {
+				 ListView list = (ListView) findViewById(R.id.listView1);
+			     list.post(new Runnable()
+			     			{
+			    	 			public void run() 
+			    	 			{
+			    	 				ListView list = (ListView) findViewById(R.id.listView1);
+			    	 				
+			    	 				list.setAdapter(new SimpleAdapter( 
+			    	 						 MainActivity.this, 
+			    	 			    		 item_list,
+			    	 			    		 android.R.layout.simple_list_item_2,
+			    	 			    		 new String[] { "store","number" },
+			    	 			    		 new int[] { android.R.id.text1, android.R.id.text2 } ));
+			    	 			}
+			     			});
+			 }
+    		
+    	}
+    	
+    };
     
     public String getIMEI()
     {
@@ -115,6 +131,35 @@ public class MainActivity extends Activity {
     	return telManager.getDeviceId();
     	
     }
+    public boolean check_connect_status()
+    {	
+    	try {
+			if(connect_to_server("/project/mobilephone/check_connect.php",null).equals("1"))
+				{
+					Toast.makeText(this, "connect", Toast.LENGTH_LONG).show();
+					return true;
+				}
+			else
+				{
+					Toast.makeText(this, "not connect", Toast.LENGTH_SHORT).show();
+					return false;
+				}
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	return false;
+    	
+		
+    	
+    	
+    	
+    }
+    
     public String connect_to_server(String program,ArrayList<NameValuePair> nameValuePairs) throws ClientProtocolException, IOException
     {	
     	//建立一個httpclient
@@ -147,8 +192,6 @@ public class MainActivity extends Activity {
     {	
     	ArrayList<HashMap<String,String>> item = new ArrayList<HashMap<String,String>>();
     	JSONArray jArray = new JSONArray(jsonString);
-    	
-    	
     	for(int i = 0;i<jArray.length();i++)
 		{	
     		 HashMap<String,String> temp = new HashMap<String,String>();
