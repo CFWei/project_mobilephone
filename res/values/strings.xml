@@ -5,5 +5,11 @@
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="TakeNumber">抽號</string>
+    <string name="title_activity_take_number">TakeNumberActivity</string>
+    <string name="title_activity_select_item">SelectItemActivity</string>
+    <string name="nowvalue">現在號碼：</string>
+    <string name="totalvalue">總號碼：</string>
+    <string name="distance">距離：</string>
+    <string name="MyNumber">我的號碼:</string>
 
 </resources>

@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -23,71 +22,110 @@ import org.json.JSONObject;
 
 
 
-
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.ListActivity;
-import android.content.Context;
-import android.util.Log;
+import android.telephony.TelephonyManager;
 import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.support.v4.app.NavUtils;
-import android.telephony.TelephonyManager;
 
 
-public class MainActivity extends Activity {
-	String ServerURL="http://192.168.0.104/";
-	private String UserIMEI;
+public class MainActivity extends Activity implements OnClickListener {
+	static String ServerURL="http://192.168.0.100/";
+	public static String UserIMEI;
 	public ArrayList<HashMap<String,String>> item_list=null;
 	private Handler main_thread_handler=new Handler();
 	private Handler threadhandler;
 	private HandlerThread mthread;
+	public boolean connect_status=false;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        check_connect_status();
-        UserIMEI=getIMEI();
         
-			
-        mthread=new HandlerThread("name");
+        if(connect_status=check_connect_status())
+        	UserIMEI=getIMEI();
         
-        mthread.start();
+        Button takenumber=(Button)findViewById(R.id.takenumber);
+        takenumber.setOnClickListener(this);
         
-        threadhandler=new Handler(mthread.getLooper());
-        threadhandler.post(load_item);
-      
-       
-
     }
     
+    
+    
     @Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		if(connect_status)
+			{
+				mthread=new HandlerThread("name");
+		        mthread.start();
+		        
+		        threadhandler=new Handler(mthread.getLooper());
+		        threadhandler.post(load_item);
+			}
+		
+		
+	}
+    
+
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		if(threadhandler!=null)
+				threadhandler.removeCallbacks(load_item);
+		if(mthread!=null)
+				mthread.quit();
+
+	}
+
+
+
+	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
     }
     
-    
-    private Runnable load_item=new Runnable()
+
+    public void onClick(View arg0) 
+    {
+    	if(arg0.getId()==R.id.takenumber)
+    		{
+    			Intent intent = new Intent();
+    			intent.setClass(this,TakeNumberActivity.class);
+    			startActivity(intent);	
+    		
+    		}
+    		
+		
+	}
+
+	private Runnable load_item=new Runnable()
     {	
     	private SimpleAdapter adapter;
     	public void run()
     	{	
            
 			try {
-				
 			    	ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
 			    	nameValuePairs.add(new BasicNameValuePair("custom_id",UserIMEI));
 			    	String get_item_list;
 					get_item_list = connect_to_server("/project/mobilephone/check_item.php",nameValuePairs);
-					String key[]={"custom_id","store","item","number"};
+					String key[]={"custom_id","store","item","number","StoreName","ItemName"};
 					item_list=json_deconde(get_item_list,key);
 			    } catch (ClientProtocolException e) {
 				// TODO Auto-generated catch block
@@ -112,9 +150,9 @@ public class MainActivity extends Activity {
 			    	 				list.setAdapter(new SimpleAdapter( 
 			    	 						 MainActivity.this, 
 			    	 			    		 item_list,
-			    	 			    		 android.R.layout.simple_list_item_2,
-			    	 			    		 new String[] { "store","number" },
-			    	 			    		 new int[] { android.R.id.text1, android.R.id.text2 } ));
+			    	 			    		 R.layout.waitingitemistview,
+			    	 			    		 new String[] { "StoreName","number" },
+			    	 			    		 new int[] { R.id.textView1, R.id.textView3 } ));
 			    	 			}
 			     			});
 			 }
@@ -134,16 +172,31 @@ public class MainActivity extends Activity {
     public boolean check_connect_status()
     {	
     	try {
-			if(connect_to_server("/project/mobilephone/check_connect.php",null).equals("1"))
-				{
-					Toast.makeText(this, "connect", Toast.LENGTH_LONG).show();
-					return true;
-				}
-			else
-				{
-					Toast.makeText(this, "not connect", Toast.LENGTH_SHORT).show();
-					return false;
-				}
+    			ConnectivityManager cm=(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+    			NetworkInfo network_info=cm.getActiveNetworkInfo();
+    			if(network_info==null||network_info.isConnected()==false)
+    				{
+						
+						Toast.makeText(this, "網路狀態：關閉", Toast.LENGTH_LONG).show();
+    					return false;
+					
+    				}
+    			else
+    				{
+    					Toast.makeText(this, "網路狀態：開啟", Toast.LENGTH_LONG).show();
+    				}
+    		
+    		
+				if(connect_to_server("/project/mobilephone/check_connect.php",null).equals("1"))
+					{
+						Toast.makeText(this, "可連接至主機", Toast.LENGTH_LONG).show();
+						return true;
+					}
+				else
+					{
+						Toast.makeText(this, "not connect", Toast.LENGTH_SHORT).show();
+						return false;
+					}
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
