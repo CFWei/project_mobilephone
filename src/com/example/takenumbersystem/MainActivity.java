@@ -30,6 +30,8 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
@@ -82,6 +84,21 @@ public class MainActivity extends Activity implements OnClickListener {
 		
 	}
     
+
+
+	@Override
+	protected void onPause() 
+	{
+		super.onPause();
+		if(threadhandler!=null)
+			threadhandler.removeCallbacks(load_item);
+		if(mthread!=null)
+			mthread.quit();
+		if(main_thread_handler!=null)
+			main_thread_handler.removeCallbacks(update_value);
+		
+	}
+
 
 
 	@Override
@@ -157,12 +174,12 @@ public class MainActivity extends Activity implements OnClickListener {
 			    	 						 MainActivity.this, 
 			    	 			    		 item_list,
 			    	 			    		 R.layout.waitingitemistview,
-			    	 			    		 new String[] { "StoreName","number" },
-			    	 			    		 new int[] { R.id.textView1, R.id.textView3 } ));
+			    	 			    		 new String[] { "StoreName","number","ItemName" },
+			    	 			    		 new int[] { R.id.textView1, R.id.textView3,R.id.textView4} ));
 			    	 			}
 			     			});
 			     
-			     main_thread_handler.postDelayed(update_value, 2000);
+			     main_thread_handler.postDelayed(update_value, 500);
 			     
 			 }
     		
@@ -179,16 +196,31 @@ public class MainActivity extends Activity implements OnClickListener {
 				 	for(int i=0;i<item_list.size();i++)
 				 	{
 						ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
-						nameValuePairs.add(new BasicNameValuePair("store",item_list.get(0).get("store")));
-						nameValuePairs.add(new BasicNameValuePair("item",item_list.get(0).get("item")));
+						nameValuePairs.add(new BasicNameValuePair("store",item_list.get(i).get("store")));
+						nameValuePairs.add(new BasicNameValuePair("item",item_list.get(i).get("item")));
 						String result=connect_to_server("/project/mobilephone/update_value.php",nameValuePairs);
-						Log.v("TEST", result);
+					
+						item_list.get(i).put("Now_Value", result);
+						
 						
 						ListView list=(ListView) findViewById(R.id.listView1);
 						int first_position=list.getFirstVisiblePosition();
 						View v=list.getChildAt(i-first_position);
 						TextView text=(TextView)v.findViewById(R.id.textView2);
 						text.setText(result);
+						
+						if(item_list.get(i).get("Now_Value").equals(item_list.get(i).get("number")))
+						{
+							MainActivity.this.runOnUiThread(new Runnable()
+									{
+										public void run() {
+											Toast.makeText(MainActivity.this, "到號", Toast.LENGTH_SHORT).show();
+											
+										}
+									}
+									);
+							update_list(i);
+						}
 				 	}
 					
 					main_thread_handler.postDelayed(this, 2000);
@@ -207,6 +239,8 @@ public class MainActivity extends Activity implements OnClickListener {
     	
     	
     };
+    
+   
     
     
     
@@ -261,6 +295,14 @@ public class MainActivity extends Activity implements OnClickListener {
     	
     	
     }
+    
+    public void update_list(int position)
+    {
+    	item_list.remove(position);
+    	ListView list=(ListView) findViewById(R.id.listView1);
+    	((SimpleAdapter)list.getAdapter()).notifyDataSetChanged();
+    }
+    
     
     public String connect_to_server(String program,ArrayList<NameValuePair> nameValuePairs) throws ClientProtocolException, IOException
     {	

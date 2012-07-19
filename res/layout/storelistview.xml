@@ -37,6 +37,15 @@
             android:layout_toRightOf="@+id/distance"
             android:text="TextView" />
 
+         <TextView
+             android:id="@+id/meter"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_alignBaseline="@+id/textView3"
+             android:layout_alignBottom="@+id/textView3"
+             android:layout_toRightOf="@+id/textView3"
+             android:text="m" />
+
     </RelativeLayout>
 
      <RelativeLayout

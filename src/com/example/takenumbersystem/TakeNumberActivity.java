@@ -196,14 +196,9 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 							
 							startActivityForResult(intent,getresult);
 							
-							
 						}
 
 					});
-					
-					
-					
-					
 					
 				}
 			
