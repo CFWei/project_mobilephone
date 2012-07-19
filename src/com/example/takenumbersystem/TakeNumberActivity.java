@@ -59,7 +59,8 @@ public class TakeNumberActivity extends Activity implements LocationListener {
         if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)&&locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
         	{	
         		Criteria criteria = new Criteria();
-    			criteria.setAccuracy(criteria.ACCURACY_FINE);
+    			criteria.setAccuracy(criteria.ACCURACY_MEDIUM);
+    			
     			String bestProvider = locationManager.getBestProvider(criteria, true);
     			
         		locationManager.requestLocationUpdates(bestProvider,0,0,this);
@@ -108,6 +109,8 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 		Double longitude = location.getLongitude();	//取得經度
 		Double latitude = location.getLatitude();//取得緯度
 		
+
+		
 		location_message parameter=SetLocation(longitude,latitude);
 		get_store_list(parameter);
 		locationManager.removeUpdates(this);
@@ -133,6 +136,7 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 	*/
 	public void get_store_list(location_message location) 
 	{	
+
 		ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
 		nameValuePairs.add(new BasicNameValuePair("logitude",String.valueOf(location.longitude)));
 		nameValuePairs.add(new BasicNameValuePair("latitude",String.valueOf(location.latitude)));

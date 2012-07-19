@@ -31,23 +31,26 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
 public class MainActivity extends Activity implements OnClickListener {
-	static String ServerURL="http://192.168.0.100/";
+	static String ServerURL="http://192.168.20.161/";
 	public static String UserIMEI;
 	public ArrayList<HashMap<String,String>> item_list=null;
 	private Handler main_thread_handler=new Handler();
 	private Handler threadhandler;
 	private HandlerThread mthread;
 	public boolean connect_status=false;
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +92,9 @@ public class MainActivity extends Activity implements OnClickListener {
 				threadhandler.removeCallbacks(load_item);
 		if(mthread!=null)
 				mthread.quit();
+		if(main_thread_handler!=null)
+			main_thread_handler.removeCallbacks(update_value);
+		
 
 	}
 
@@ -113,7 +119,7 @@ public class MainActivity extends Activity implements OnClickListener {
     		
 		
 	}
-
+    
 	private Runnable load_item=new Runnable()
     {	
     	private SimpleAdapter adapter;
@@ -155,11 +161,54 @@ public class MainActivity extends Activity implements OnClickListener {
 			    	 			    		 new int[] { R.id.textView1, R.id.textView3 } ));
 			    	 			}
 			     			});
+			     
+			     main_thread_handler.postDelayed(update_value, 2000);
+			     
 			 }
     		
     	}
     	
     };
+    
+    private Runnable update_value=new Runnable()
+    {
+
+		public void run() 
+		{	
+			try {
+				 	for(int i=0;i<item_list.size();i++)
+				 	{
+						ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
+						nameValuePairs.add(new BasicNameValuePair("store",item_list.get(0).get("store")));
+						nameValuePairs.add(new BasicNameValuePair("item",item_list.get(0).get("item")));
+						String result=connect_to_server("/project/mobilephone/update_value.php",nameValuePairs);
+						Log.v("TEST", result);
+						
+						ListView list=(ListView) findViewById(R.id.listView1);
+						int first_position=list.getFirstVisiblePosition();
+						View v=list.getChildAt(i-first_position);
+						TextView text=(TextView)v.findViewById(R.id.textView2);
+						text.setText(result);
+				 	}
+					
+					main_thread_handler.postDelayed(this, 2000);
+			} 
+			catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+			catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+    	
+    	
+    	
+    };
+    
+    
     
     public String getIMEI()
     {
