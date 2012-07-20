@@ -256,6 +256,9 @@ public class MainActivity extends Activity implements OnClickListener {
 							{
 								delete_list[delete_list_sp]=i;
 								delete_list_sp++;
+								
+								
+								
 							}
 						item_list.get(i).put("Now_Value", result);
 						
@@ -264,8 +267,16 @@ public class MainActivity extends Activity implements OnClickListener {
 				 	
 				 	for(int i=delete_list_sp-1;i>=0;i--)
 				 		{	
-				 			
-				 			item_list.remove(delete_list[i]);
+				 			int delete_item_num=delete_list[i]; 
+
+				 			ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
+							nameValuePairs.add(new BasicNameValuePair("Store",item_list.get(delete_item_num).get("store")));
+							nameValuePairs.add(new BasicNameValuePair("Item",item_list.get(delete_item_num).get("item")));
+							nameValuePairs.add(new BasicNameValuePair("Number",item_list.get(delete_item_num).get("number")));
+							nameValuePairs.add(new BasicNameValuePair("UserIMEI",UserIMEI));
+							connect_to_server("/project/mobilephone/del_item.php",nameValuePairs);
+							
+				 			item_list.remove(delete_item_num);
 				 		
 				 		}
 				 	
