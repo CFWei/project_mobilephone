@@ -22,8 +22,11 @@ import org.json.JSONObject;
 
 
 
+import android.R.integer;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -33,6 +36,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.TelephonyManager;
+import android.text.method.DialerKeyListener;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -148,8 +152,19 @@ public class MainActivity extends Activity implements OnClickListener {
 			    	nameValuePairs.add(new BasicNameValuePair("custom_id",UserIMEI));
 			    	String get_item_list;
 					get_item_list = connect_to_server("/project/mobilephone/check_item.php",nameValuePairs);
+					
+					//json decode 
 					String key[]={"custom_id","store","item","number","StoreName","ItemName"};
 					item_list=json_deconde(get_item_list,key);
+					
+					for(int i=0;i<item_list.size();i++)
+						{
+							item_list.get(i).put("Now_Value","");
+							item_list.get(i).put("alert_text", "");
+						}
+						
+					
+					
 			    } catch (ClientProtocolException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -174,12 +189,12 @@ public class MainActivity extends Activity implements OnClickListener {
 			    	 						 MainActivity.this, 
 			    	 			    		 item_list,
 			    	 			    		 R.layout.waitingitemistview,
-			    	 			    		 new String[] { "StoreName","number","ItemName" },
-			    	 			    		 new int[] { R.id.textView1, R.id.textView3,R.id.textView4} ));
+			    	 			    		 new String[] { "StoreName","number","ItemName","Now_Value","alert_text" },
+			    	 			    		 new int[] { R.id.textView1, R.id.textView3,R.id.textView4,R.id.textView2,R.id.alert} ));
 			    	 			}
 			     			});
 			     
-			     main_thread_handler.postDelayed(update_value, 500);
+			     threadhandler.postDelayed(update_value, 500);
 			     
 			 }
     		
@@ -190,40 +205,56 @@ public class MainActivity extends Activity implements OnClickListener {
     private Runnable update_value=new Runnable()
     {
 
+	
+
 		public void run() 
 		{	
-			try {
+			try {	
+					int delete_list[]=new int[item_list.size()];
+					int delete_list_sp=0;
 				 	for(int i=0;i<item_list.size();i++)
 				 	{
 						ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
 						nameValuePairs.add(new BasicNameValuePair("store",item_list.get(i).get("store")));
 						nameValuePairs.add(new BasicNameValuePair("item",item_list.get(i).get("item")));
 						String result=connect_to_server("/project/mobilephone/update_value.php",nameValuePairs);
-					
+						
+						if(item_list.get(i).get("number").equals(result)&&!item_list.get(i).containsKey("alert"))
+							{	
+								item_list.get(i).put("alert","1");
+								alert a=new alert();
+								a.setData(i);
+								MainActivity.this.runOnUiThread(a);
+							}
+						if(Integer.parseInt(item_list.get(i).get("number"))<Integer.parseInt(result))
+							{
+								delete_list[delete_list_sp]=i;
+								delete_list_sp++;
+							}
 						item_list.get(i).put("Now_Value", result);
 						
 						
-						ListView list=(ListView) findViewById(R.id.listView1);
-						int first_position=list.getFirstVisiblePosition();
-						View v=list.getChildAt(i-first_position);
-						TextView text=(TextView)v.findViewById(R.id.textView2);
-						text.setText(result);
 						
-						if(item_list.get(i).get("Now_Value").equals(item_list.get(i).get("number")))
-						{
-							MainActivity.this.runOnUiThread(new Runnable()
-									{
-										public void run() {
-											Toast.makeText(MainActivity.this, "到號", Toast.LENGTH_SHORT).show();
-											
-										}
-									}
-									);
-							update_list(i);
-						}
 				 	}
+				 	for(int i=delete_list_sp-1;i>=0;i--)
+				 		{
+				 			item_list.remove(delete_list[i]);
+				 		
+				 		}
+				 	delete_list_sp=0;
+				 	
+					MainActivity.this.runOnUiThread(new Runnable(){
+						public void run() 
+						{
+							ListView list=(ListView) findViewById(R.id.listView1);
+					    	((SimpleAdapter)list.getAdapter()).notifyDataSetChanged();
+							
+						}});
 					
-					main_thread_handler.postDelayed(this, 2000);
+					
+					
+					
+				 	threadhandler.postDelayed(this, 2000);
 			} 
 			catch (ClientProtocolException e) {
 				// TODO Auto-generated catch block
@@ -241,6 +272,38 @@ public class MainActivity extends Activity implements OnClickListener {
     };
     
    
+    public class alert implements Runnable {
+    	  private int num;
+    	  
+    	  public void setData(int data) 
+    	  {
+    	    num=data;
+    	  }
+
+    	  public void run() 
+    	  {
+    		  AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+    		  builder.setMessage(item_list.get(num).get("StoreName")+":"+item_list.get(num).get("ItemName"));
+    		  builder.setTitle("到號通知");
+    		  DialogInterface.OnClickListener okclick=new DialogInterface.OnClickListener()
+    		  {
+
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					
+				}
+    			  
+    		  };
+    		  builder.setNeutralButton("確認", okclick);
+    		  AlertDialog alert = builder.create();
+    		  alert.show();
+    		  
+    		  item_list.get(num).put("alert_text","到號");
+    		  
+    		
+    	  }
+    	}
+    
     
     
     
@@ -252,6 +315,15 @@ public class MainActivity extends Activity implements OnClickListener {
     	return telManager.getDeviceId();
     	
     }
+    
+    public void update_list(int position)
+    {
+    	item_list.remove(position);
+    	ListView list=(ListView) findViewById(R.id.listView1);
+    	((SimpleAdapter)list.getAdapter()).notifyDataSetChanged();
+    }
+    
+    
     public boolean check_connect_status()
     {	
     	try {
@@ -296,12 +368,7 @@ public class MainActivity extends Activity implements OnClickListener {
     	
     }
     
-    public void update_list(int position)
-    {
-    	item_list.remove(position);
-    	ListView list=(ListView) findViewById(R.id.listView1);
-    	((SimpleAdapter)list.getAdapter()).notifyDataSetChanged();
-    }
+  
     
     
     public String connect_to_server(String program,ArrayList<NameValuePair> nameValuePairs) throws ClientProtocolException, IOException
