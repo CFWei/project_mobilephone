@@ -23,8 +23,10 @@ import org.json.JSONObject;
 
 
 import android.R.integer;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -48,15 +50,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+
+@SuppressLint({ "NewApi", "NewApi" })
 public class MainActivity extends Activity implements OnClickListener {
-	static String ServerURL="http://192.168.20.161/";
+	static String ServerURL="http://192.168.0.100/";
 	public static String UserIMEI;
 	public ArrayList<HashMap<String,String>> item_list=null;
 	private Handler main_thread_handler=new Handler();
 	private Handler threadhandler;
 	private HandlerThread mthread;
 	public boolean connect_status=false;
-	int ppp=0;
+	ProgressDialog myDialog ;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,7 +82,8 @@ public class MainActivity extends Activity implements OnClickListener {
     	
 		// TODO Auto-generated method stub
 		super.onResume();
-
+		
+		myDialog= ProgressDialog.show(this,"抽號系統","與server聯繫中 請稍候",true);
 		mthread=new HandlerThread("name");
 		mthread.start();
 		       
@@ -170,8 +175,10 @@ public class MainActivity extends Activity implements OnClickListener {
 			    	String get_item_list;
 					get_item_list = connect_to_server("/project/mobilephone/check_item.php",nameValuePairs);
 					
+					Log.v("debug", get_item_list);
 					//json decode 
 					String key[]={"custom_id","store","item","number","StoreName","ItemName"};
+					
 					item_list=json_deconde(get_item_list,key);
 					
 					for(int i=0;i<item_list.size();i++)
@@ -213,7 +220,16 @@ public class MainActivity extends Activity implements OnClickListener {
 			    	 			    		 new int[] { R.id.textView1, R.id.textView3,R.id.textView4,R.id.textView2,R.id.alert} ));
 			    	 			}
 			     			});
-			     
+			     MainActivity.this.runOnUiThread(new Runnable(){
+
+					public void run() {
+						myDialog.dismiss();
+						
+					}
+			    	 
+			    	 
+			    	 
+			     });
 			     threadhandler.postDelayed(update_value, 500);
 			     
 			 }
@@ -365,30 +381,32 @@ public class MainActivity extends Activity implements OnClickListener {
     
     public boolean check_connect_status()
     {	
-    	try {
+    	try {	
+    			
     			ConnectivityManager cm=(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     			NetworkInfo network_info=cm.getActiveNetworkInfo();
     			if(network_info==null||network_info.isConnected()==false)
     				{
 						
-						Toast.makeText(this, "網路狀態：關閉", Toast.LENGTH_LONG).show();
+						//Toast.makeText(this, "網路狀態：關閉", Toast.LENGTH_SHORT).show();
     					return false;
 					
     				}
     			else
-    				{
-    					Toast.makeText(this, "網路狀態：開啟", Toast.LENGTH_LONG).show();
+    				{	
+    				
+    					//Toast.makeText(this, "網路狀態：開啟", Toast.LENGTH_SHORT).show();
     				}
     		
     		
 				if(connect_to_server("/project/mobilephone/check_connect.php",null).equals("1"))
 					{
-						Toast.makeText(this, "可連接至主機", Toast.LENGTH_LONG).show();
+						//Toast.makeText(this, "可連接至主機", Toast.LENGTH_SHORT).show();
 						return true;
 					}
 				else
 					{
-						Toast.makeText(this, "not connect", Toast.LENGTH_SHORT).show();
+						//Toast.makeText(this, "not connect", Toast.LENGTH_SHORT).show();
 						return false;
 					}
 		} catch (ClientProtocolException e) {

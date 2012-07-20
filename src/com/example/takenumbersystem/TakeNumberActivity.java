@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.Settings;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -50,6 +51,7 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 	private static final int getresult=1;
 	private Handler threadhandler;
 	private HandlerThread mthread;
+	ProgressDialog myDialog ;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +80,8 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 				Toast.makeText(this, "請開啟定位服務", Toast.LENGTH_LONG).show();
 				startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));	//開啟設定頁面
 			  }
+        
+        	myDialog= ProgressDialog.show(this,"抽號系統","讀取位置中",true);
     }
     
    
@@ -108,6 +112,8 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 		Double longitude = location.getLongitude();	//取得經度
 		Double latitude = location.getLatitude();//取得緯度
 		
+		myDialog.dismiss();
+		myDialog= ProgressDialog.show(this,"抽號系統","搜尋附近店家",true);
 		mthread=new HandlerThread("name");
 		mthread.start();
 		       
@@ -219,11 +225,12 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 							startActivityForResult(intent,getresult);
 							
 						}
+					
 
 					});
 					
 				}
-			
+				myDialog.dismiss();
 			} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
