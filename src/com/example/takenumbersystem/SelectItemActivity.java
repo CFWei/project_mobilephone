@@ -88,7 +88,11 @@ public class SelectItemActivity extends Activity {
 			showitem.setOnItemClickListener(new OnItemClickListener() 
 			{
 				public void onItemClick(AdapterView<?> arg0, View arg1,int position, long id) 
-				{
+				{	
+					ItemClickRunnable a=new ItemClickRunnable();
+					a.setDate(item_list.get(position).get("ID"),SerialNumbers,MainActivity.UserIMEI);
+					threadhandler.post(a);
+					/*
 					ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
 					nameValuePairs.add(new BasicNameValuePair("ItemId",item_list.get(position).get("ID")));
 					nameValuePairs.add(new BasicNameValuePair("SerialNumbers",SerialNumbers));
@@ -116,7 +120,7 @@ public class SelectItemActivity extends Activity {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					
+					*/
 				}
 				
 			});
@@ -160,7 +164,50 @@ public class SelectItemActivity extends Activity {
         return true;
     }
     
+    public class ItemClickRunnable implements Runnable 
+    {
+    	private String ItemId,SerialNumbers,UserIMEI;
+    	public void setDate(String getItemId,String getSerialNumbers,String getUserIMEI )
+		{
+    		ItemId=getItemId;
+    		SerialNumbers=getSerialNumbers;
+    		UserIMEI=getUserIMEI;
+		}
+		public void run() 
+		{
+			ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
+			nameValuePairs.add(new BasicNameValuePair("ItemId",ItemId));
+			nameValuePairs.add(new BasicNameValuePair("SerialNumbers",SerialNumbers));
+			nameValuePairs.add(new BasicNameValuePair("UserIMEI",UserIMEI));
+			
+			String result;
+			try {
+				result = connect_to_server("/project/mobilephone/take_number.php",nameValuePairs);
+				Log.v("add", result);
+				
+				if(!result.equals("fail")&&!result.equals("MySQL Query Error"))
+					{
+						toast("你現在抽到的號碼是:"+result);
+						setResult(RESULT_OK);
+						SelectItemActivity.this.finish();
+					}
+				else
+					{
+						toast("抽號失敗");
 
+					}
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+		}
+    	
+    }
     
     
     public String connect_to_server(String program,ArrayList<NameValuePair> nameValuePairs) throws ClientProtocolException, IOException

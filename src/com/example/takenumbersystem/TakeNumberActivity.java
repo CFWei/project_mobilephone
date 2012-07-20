@@ -48,7 +48,8 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 	private LocationManager locationManager;
 	public ArrayList<HashMap<String,String>> store_list=null;
 	private static final int getresult=1;
-
+	private Handler threadhandler;
+	private HandlerThread mthread;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,8 +95,6 @@ public class TakeNumberActivity extends Activity implements LocationListener {
     
     public location_message SetLocation(Double longitude,Double latitude)
     {
-		
-			
 		//設定return value
 		location_message return_value=new location_message();
 		return_value.longitude=longitude;
@@ -109,10 +108,13 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 		Double longitude = location.getLongitude();	//取得經度
 		Double latitude = location.getLatitude();//取得緯度
 		
-
-		
-		location_message parameter=SetLocation(longitude,latitude);
-		get_store_list(parameter);
+		mthread=new HandlerThread("name");
+		mthread.start();
+		       
+		threadhandler=new Handler(mthread.getLooper());
+		GetStoreListRunnable a=new GetStoreListRunnable();
+		a.setData(longitude, latitude);
+		threadhandler.post(a);
 		locationManager.removeUpdates(this);
 	}
 	/*
@@ -134,6 +136,26 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 		Toast.makeText(this, "hello",Toast.LENGTH_SHORT).show();
 	}
 	*/
+	public class GetStoreListRunnable implements Runnable
+    {
+		private double longitude,latitude;
+		public void setData(double get_longitude,double get_latitude)
+		{
+			longitude=get_longitude;
+			latitude=get_latitude;
+			
+		}
+		public void run() {
+			location_message parameter=SetLocation(longitude,latitude);
+			get_store_list(parameter);
+		}
+		
+		
+		
+    };
+	
+	
+	
 	public void get_store_list(location_message location) 
 	{	
 

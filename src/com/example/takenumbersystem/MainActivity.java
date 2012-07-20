@@ -56,14 +56,14 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Handler threadhandler;
 	private HandlerThread mthread;
 	public boolean connect_status=false;
+	int ppp=0;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        if(connect_status=check_connect_status())
-        	UserIMEI=getIMEI();
+        UserIMEI=getIMEI();
         
         Button takenumber=(Button)findViewById(R.id.takenumber);
         takenumber.setOnClickListener(this);
@@ -73,27 +73,27 @@ public class MainActivity extends Activity implements OnClickListener {
     
     
     @Override
-	protected void onResume() {
+	protected void onResume() 
+    {
+    	
 		// TODO Auto-generated method stub
 		super.onResume();
-		if(connect_status)
-			{
-				mthread=new HandlerThread("name");
-		        mthread.start();
-		        
-		        threadhandler=new Handler(mthread.getLooper());
-		        threadhandler.post(load_item);
-			}
-		
-		
+
+		mthread=new HandlerThread("name");
+		mthread.start();
+		       
+		threadhandler=new Handler(mthread.getLooper());
+		threadhandler.post(check_connect_status_runnable);
+
 	}
     
 
 
 	@Override
 	protected void onPause() 
-	{
+	{	
 		super.onPause();
+		
 		if(threadhandler!=null)
 			threadhandler.removeCallbacks(load_item);
 		if(mthread!=null)
@@ -108,6 +108,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	@Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
+		
 		super.onDestroy();
 		if(threadhandler!=null)
 				threadhandler.removeCallbacks(load_item);
@@ -118,7 +119,23 @@ public class MainActivity extends Activity implements OnClickListener {
 		
 
 	}
+	
+	
+	private Runnable check_connect_status_runnable=new Runnable()
+    {
 
+		public void run() 
+		{
+			if(check_connect_status())
+				{
+					connect_status=true;
+					threadhandler.post(load_item);
+				}
+			threadhandler.removeCallbacks(check_connect_status_runnable);
+		}	
+		
+		
+    };
 
 
 	@Override
@@ -175,9 +192,12 @@ public class MainActivity extends Activity implements OnClickListener {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-    			
-			 if(item_list!=null)
-			 {
+			
+				
+			
+			if(item_list!=null)
+			 {	
+				
 				 ListView list = (ListView) findViewById(R.id.listView1);
 			     list.post(new Runnable()
 			     			{
@@ -212,8 +232,9 @@ public class MainActivity extends Activity implements OnClickListener {
 			try {	
 					int delete_list[]=new int[item_list.size()];
 					int delete_list_sp=0;
+			
 				 	for(int i=0;i<item_list.size();i++)
-				 	{
+				 	{	
 						ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
 						nameValuePairs.add(new BasicNameValuePair("store",item_list.get(i).get("store")));
 						nameValuePairs.add(new BasicNameValuePair("item",item_list.get(i).get("item")));
@@ -221,11 +242,16 @@ public class MainActivity extends Activity implements OnClickListener {
 						
 						if(item_list.get(i).get("number").equals(result)&&!item_list.get(i).containsKey("alert"))
 							{	
+								Log.v("debug", String.valueOf(i));
 								item_list.get(i).put("alert","1");
+								
 								alert a=new alert();
-								a.setData(i);
+								a.setData(i,item_list.get(i).get("StoreName"),item_list.get(i).get("ItemName"));
 								MainActivity.this.runOnUiThread(a);
+								
+								 item_list.get(i).put("alert_text","到號");
 							}
+						
 						if(Integer.parseInt(item_list.get(i).get("number"))<Integer.parseInt(result))
 							{
 								delete_list[delete_list_sp]=i;
@@ -233,14 +259,17 @@ public class MainActivity extends Activity implements OnClickListener {
 							}
 						item_list.get(i).put("Now_Value", result);
 						
-						
-						
 				 	}
+				 	
+				 	
 				 	for(int i=delete_list_sp-1;i>=0;i--)
-				 		{
+				 		{	
+				 			
 				 			item_list.remove(delete_list[i]);
 				 		
 				 		}
+				 	
+				 	
 				 	delete_list_sp=0;
 				 	
 					MainActivity.this.runOnUiThread(new Runnable(){
@@ -250,12 +279,9 @@ public class MainActivity extends Activity implements OnClickListener {
 					    	((SimpleAdapter)list.getAdapter()).notifyDataSetChanged();
 							
 						}});
-					
-					
-					
-					
 				 	threadhandler.postDelayed(this, 2000);
-			} 
+			}
+			
 			catch (ClientProtocolException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -274,16 +300,18 @@ public class MainActivity extends Activity implements OnClickListener {
    
     public class alert implements Runnable {
     	  private int num;
-    	  
-    	  public void setData(int data) 
+    	  private String StoreName,ItemName;
+    	  public void setData(int data,String getStoreName,String getItemName) 
     	  {
     	    num=data;
+    	    StoreName=getStoreName;
+    	    ItemName=getItemName;
     	  }
 
     	  public void run() 
     	  {
     		  AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-    		  builder.setMessage(item_list.get(num).get("StoreName")+":"+item_list.get(num).get("ItemName"));
+    		  builder.setMessage(StoreName+":"+ItemName);
     		  builder.setTitle("到號通知");
     		  DialogInterface.OnClickListener okclick=new DialogInterface.OnClickListener()
     		  {
@@ -297,8 +325,8 @@ public class MainActivity extends Activity implements OnClickListener {
     		  builder.setNeutralButton("確認", okclick);
     		  AlertDialog alert = builder.create();
     		  alert.show();
-    		  
-    		  item_list.get(num).put("alert_text","到號");
+    	
+    		 
     		  
     		
     	  }

@@ -31,8 +31,10 @@
                 
             </intent-filter>
         </activity>
-        <activity android:name="TakeNumberActivity"></activity>
-        <activity android:name="SelectItemActivity"></activity>
+        <activity android:name="TakeNumberActivity"
+            	android:screenOrientation="nosensor"></activity>
+        <activity android:name="SelectItemActivity"
+            android:screenOrientation="nosensor"></activity>
         
     </application>
 
