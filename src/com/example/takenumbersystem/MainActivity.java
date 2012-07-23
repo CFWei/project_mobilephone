@@ -30,6 +30,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -37,6 +41,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.method.DialerKeyListener;
 import android.util.Log;
@@ -48,12 +53,10 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-
-
-
 @SuppressLint({ "NewApi", "NewApi" })
-public class MainActivity extends Activity implements OnClickListener {
+public class MainActivity extends Activity implements OnClickListener,LocationListener{
 	static String ServerURL="http://192.168.0.100/";
+	private static final double EARTH_RADIUS = 6378137;
 	public static String UserIMEI;
 	public ArrayList<HashMap<String,String>> item_list=null;
 	private Handler main_thread_handler=new Handler();
@@ -61,6 +64,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private HandlerThread mthread;
 	public boolean connect_status=false;
 	ProgressDialog myDialog ;
+	private LocationManager locationManager;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -74,8 +78,6 @@ public class MainActivity extends Activity implements OnClickListener {
         
     }
     
-    
-    
     @Override
 	protected void onResume() 
     {
@@ -83,48 +85,51 @@ public class MainActivity extends Activity implements OnClickListener {
 		// TODO Auto-generated method stub
 		super.onResume();
 		
-		myDialog= ProgressDialog.show(this,"抽號系統","與server聯繫中 請稍候",true);
+		//myDialog= ProgressDialog.show(this,"抽號系統","與server聯繫中 請稍候",true);
 		mthread=new HandlerThread("name");
 		mthread.start();
 		       
 		threadhandler=new Handler(mthread.getLooper());
+	
 		threadhandler.post(check_connect_status_runnable);
 
 	}
     
-
-
 	@Override
 	protected void onPause() 
 	{	
 		super.onPause();
-		
+		locationManager.removeUpdates(this);
 		if(threadhandler!=null)
-			threadhandler.removeCallbacks(load_item);
+			{
+				threadhandler.removeCallbacks(load_item);
+				threadhandler.removeCallbacks(update_value);
+			}
 		if(mthread!=null)
 			mthread.quit();
-		if(main_thread_handler!=null)
-			main_thread_handler.removeCallbacks(update_value);
+
 		
 	}
-
-
 
 	@Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		
 		super.onDestroy();
-		if(threadhandler!=null)
+		locationManager.removeUpdates(this);
+		if(!connect_status)
+				threadhandler.removeCallbacks(check_connect_status_runnable);
+		if(threadhandler!=null)	
+			{
 				threadhandler.removeCallbacks(load_item);
+				threadhandler.removeCallbacks(update_value);
+				
+			}
 		if(mthread!=null)
 				mthread.quit();
-		if(main_thread_handler!=null)
-			main_thread_handler.removeCallbacks(update_value);
 		
 
 	}
-	
 	
 	private Runnable check_connect_status_runnable=new Runnable()
     {
@@ -136,12 +141,39 @@ public class MainActivity extends Activity implements OnClickListener {
 					connect_status=true;
 					threadhandler.post(load_item);
 				}
+			else
+				{
+					/*
+				 MainActivity.this.runOnUiThread(new Runnable(){
+
+						public void run() {
+							//myDialog.dismiss();
+							
+							AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+							builder.setTitle("抽號系統");
+							
+				    		builder.setMessage("無法連上server");
+				    		DialogInterface.OnClickListener okclick=new DialogInterface.OnClickListener()
+				    		  {
+
+								public void onClick(DialogInterface dialog, int which) {
+									// TODO Auto-generated method stub
+									
+								}
+				    			  
+				    		  };
+				    		  builder.setNeutralButton("確認", okclick);
+				    		  AlertDialog alert = builder.create();
+				    		  alert.show();
+				    		
+						}});
+				 */
+				}
 			threadhandler.removeCallbacks(check_connect_status_runnable);
 		}	
 		
 		
     };
-
 
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -149,7 +181,6 @@ public class MainActivity extends Activity implements OnClickListener {
         return true;
     }
     
-
     public void onClick(View arg0) 
     {
     	if(arg0.getId()==R.id.takenumber)
@@ -174,21 +205,18 @@ public class MainActivity extends Activity implements OnClickListener {
 			    	nameValuePairs.add(new BasicNameValuePair("custom_id",UserIMEI));
 			    	String get_item_list;
 					get_item_list = connect_to_server("/project/mobilephone/check_item.php",nameValuePairs);
-					
-					Log.v("debug", get_item_list);
 					//json decode 
-					String key[]={"custom_id","store","item","number","StoreName","ItemName"};
-					
+					String key[]={"custom_id","store","item","number","StoreName","ItemName","GPS_Longitude","GPS_Latitude"};
 					item_list=json_deconde(get_item_list,key);
 					
 					for(int i=0;i<item_list.size();i++)
 						{
 							item_list.get(i).put("Now_Value","");
 							item_list.get(i).put("alert_text", "");
+							item_list.get(i).put("Distance", "定位中");
+							
 						}
-						
-					
-					
+
 			    } catch (ClientProtocolException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -199,9 +227,6 @@ public class MainActivity extends Activity implements OnClickListener {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-				
-			
 			if(item_list!=null)
 			 {	
 				
@@ -216,33 +241,30 @@ public class MainActivity extends Activity implements OnClickListener {
 			    	 						 MainActivity.this, 
 			    	 			    		 item_list,
 			    	 			    		 R.layout.waitingitemistview,
-			    	 			    		 new String[] { "StoreName","number","ItemName","Now_Value","alert_text" },
-			    	 			    		 new int[] { R.id.textView1, R.id.textView3,R.id.textView4,R.id.textView2,R.id.alert} ));
+			    	 			    		 new String[] { "StoreName","number","ItemName","Now_Value","alert_text","Distance" },
+			    	 			    		 new int[] { R.id.textView1, R.id.textView3,R.id.textView4,R.id.textView2,R.id.alert,R.id.textView6} ));
 			    	 			}
 			     			});
+			    /*
 			     MainActivity.this.runOnUiThread(new Runnable(){
 
 					public void run() {
 						myDialog.dismiss();
 						
 					}
-			    	 
-			    	 
-			    	 
+ 
 			     });
-			     threadhandler.postDelayed(update_value, 500);
+			     */
+			     TurnOnLocationListener();
 			     
+			     threadhandler.postDelayed(update_value, 500);
+			     threadhandler.removeCallbacks(load_item);
 			 }
-    		
     	}
-    	
     };
     
     private Runnable update_value=new Runnable()
     {
-
-	
-
 		public void run() 
 		{	
 			try {	
@@ -271,11 +293,9 @@ public class MainActivity extends Activity implements OnClickListener {
 						if(Integer.parseInt(item_list.get(i).get("number"))<Integer.parseInt(result))
 							{
 								delete_list[delete_list_sp]=i;
-								delete_list_sp++;
-								
-								
-								
+								delete_list_sp++;	
 							}
+						
 						item_list.get(i).put("Now_Value", result);
 						
 				 	}
@@ -295,8 +315,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				 			item_list.remove(delete_item_num);
 				 		
 				 		}
-				 	
-				 	
+
 				 	delete_list_sp=0;
 				 	
 					MainActivity.this.runOnUiThread(new Runnable(){
@@ -306,7 +325,8 @@ public class MainActivity extends Activity implements OnClickListener {
 					    	((SimpleAdapter)list.getAdapter()).notifyDataSetChanged();
 							
 						}});
-				 	threadhandler.postDelayed(this, 2000);
+				 	threadhandler.postDelayed(update_value, 2000);
+				 	
 			}
 			
 			catch (ClientProtocolException e) {
@@ -320,10 +340,36 @@ public class MainActivity extends Activity implements OnClickListener {
 			
 		}
     	
-    	
-    	
     };
     
+    public void TurnOnLocationListener()
+    {
+    	
+        locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
+        
+        if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)&&locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+        	{	
+        		Criteria criteria = new Criteria();
+    			criteria.setAccuracy(criteria.ACCURACY_MEDIUM);
+    			
+    			String bestProvider = locationManager.getBestProvider(criteria, true);
+    			Log.v("debug", bestProvider);
+        		locationManager.requestLocationUpdates(bestProvider,0,0,this);
+        	}
+        else if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        	{
+        		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,this);
+        	}
+        else if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+        	{
+        		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,this);
+        	}
+        else {
+				Toast.makeText(this, "請開啟定位服務", Toast.LENGTH_LONG).show();
+				startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));	//開啟設定頁面
+			  }
+    	
+    }
    
     public class alert implements Runnable {
     	  private int num;
@@ -358,10 +404,7 @@ public class MainActivity extends Activity implements OnClickListener {
     		
     	  }
     	}
-    
-    
-    
-    
+
     public String getIMEI()
     {
 			
@@ -377,8 +420,7 @@ public class MainActivity extends Activity implements OnClickListener {
     	ListView list=(ListView) findViewById(R.id.listView1);
     	((SimpleAdapter)list.getAdapter()).notifyDataSetChanged();
     }
-    
-    
+  
     public boolean check_connect_status()
     {	
     	try {	
@@ -394,7 +436,6 @@ public class MainActivity extends Activity implements OnClickListener {
     				}
     			else
     				{	
-    				
     					//Toast.makeText(this, "網路狀態：開啟", Toast.LENGTH_SHORT).show();
     				}
     		
@@ -424,10 +465,7 @@ public class MainActivity extends Activity implements OnClickListener {
     	
     	
     }
-    
-  
-    
-    
+
     public String connect_to_server(String program,ArrayList<NameValuePair> nameValuePairs) throws ClientProtocolException, IOException
     {	
     	//建立一個httpclient
@@ -474,5 +512,58 @@ public class MainActivity extends Activity implements OnClickListener {
 		return item;
     	
     }
+
+	public void onLocationChanged(Location arg0) 
+	{	
+		if(!item_list.isEmpty())
+			{
+				for(int i=0;i<item_list.size();i++)
+				{
+					double lat=Double.parseDouble(item_list.get(i).get("GPS_Latitude"));
+					double lng=Double.parseDouble(item_list.get(i).get("GPS_Longitude"));
+					double dis=getDistance(arg0.getLatitude(),lat,arg0.getLongitude(),lng);
+					item_list.get(i).put("Distance",String.valueOf(dis));
+					Log.v("debug", String.valueOf(dis));
+				}
+			}
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onProviderEnabled(String arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onProviderDisabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
     
+	public static double rad(double d)
+	{
+		return d*Math.PI/180.0;
+	}
+	
+	public double getDistance(double lat1,double lat2,double lng1,double lng2)
+	{
+		double radlat1=rad(lat1);
+		double radlat2=rad(lat2);
+		double radlng1=rad(lng1);
+		double radlng2=rad(lng2);
+		
+		double a=radlat1-radlat2;
+		double b=radlng1-radlng2;
+		
+		double s=2*Math.asin(Math.sqrt(Math.pow(Math.sin(a/2),2) + 
+			        Math.cos(radlat1)*Math.cos(radlat2)*Math.pow(Math.sin(b/2),2)));
+		s=s*EARTH_RADIUS;
+		
+		return s;
+	}
 }

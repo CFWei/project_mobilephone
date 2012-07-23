@@ -65,7 +65,7 @@ public class TakeNumberActivity extends Activity implements LocationListener {
     			criteria.setAccuracy(criteria.ACCURACY_MEDIUM);
     			
     			String bestProvider = locationManager.getBestProvider(criteria, true);
-    			
+    			Log.v("debug", bestProvider);
         		locationManager.requestLocationUpdates(bestProvider,0,0,this);
         	}
         else if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
@@ -81,11 +81,18 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 				startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));	//開啟設定頁面
 			  }
         
-        	myDialog= ProgressDialog.show(this,"抽號系統","讀取位置中",true);
+        	//myDialog= ProgressDialog.show(this,"抽號系統","讀取位置中",true);
     }
     
    
     @Override
+	protected void onDestroy() {
+		super.onDestroy();
+		
+	}
+
+
+	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_take_number, menu);
         return true;
@@ -112,7 +119,8 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 		Double longitude = location.getLongitude();	//取得經度
 		Double latitude = location.getLatitude();//取得緯度
 		
-		myDialog.dismiss();
+		//myDialog.dismiss();
+		
 		myDialog= ProgressDialog.show(this,"抽號系統","搜尋附近店家",true);
 		mthread=new HandlerThread("name");
 		mthread.start();
@@ -154,6 +162,7 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 		public void run() {
 			location_message parameter=SetLocation(longitude,latitude);
 			get_store_list(parameter);
+		
 		}
 		
 		
