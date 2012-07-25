@@ -513,7 +513,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     	
     }
 
-	public void onLocationChanged(Location arg0) 
+	public void onLocationChantoged(Location arg0) 
 	{	
 		if(!item_list.isEmpty())
 			{
@@ -565,5 +565,10 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		s=s*EARTH_RADIUS;
 		
 		return s;
+	}
+
+	public void onLocationChanged(Location arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 }
