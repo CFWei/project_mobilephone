@@ -183,7 +183,7 @@ public class SelectItemActivity extends Activity {
 			String result;
 			try {
 				result = connect_to_server("/project/mobilephone/take_number.php",nameValuePairs);
-				Log.v("add", result);
+				
 				
 				if(!result.equals("fail")&&!result.equals("MySQL Query Error"))
 					{

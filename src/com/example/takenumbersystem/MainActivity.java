@@ -55,16 +55,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 @SuppressLint({ "NewApi", "NewApi" })
 public class MainActivity extends Activity implements OnClickListener,LocationListener{
-	static String ServerURL="http://192.168.0.100/";
+	static String ServerURL="http://192.168.20.161/";
 	private static final double EARTH_RADIUS = 6378137;
 	public static String UserIMEI;
 	public ArrayList<HashMap<String,String>> item_list=null;
 	private Handler main_thread_handler=new Handler();
 	private Handler threadhandler;
 	private HandlerThread mthread;
-	public boolean connect_status=false;
+	public boolean connect_status=false,location_status=false;
 	ProgressDialog myDialog ;
 	private LocationManager locationManager;
+	
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -92,14 +93,14 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		threadhandler=new Handler(mthread.getLooper());
 	
 		threadhandler.post(check_connect_status_runnable);
-
+		  TurnOnLocationListener();
 	}
     
 	@Override
 	protected void onPause() 
 	{	
 		super.onPause();
-		locationManager.removeUpdates(this);
+	
 		if(threadhandler!=null)
 			{
 				threadhandler.removeCallbacks(load_item);
@@ -107,6 +108,12 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 			}
 		if(mthread!=null)
 			mthread.quit();
+		
+		if(location_status==true)
+			{
+				locationManager.removeUpdates(this);
+				location_status=false;
+			}
 
 		
 	}
@@ -116,7 +123,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		// TODO Auto-generated method stub
 		
 		super.onDestroy();
-		locationManager.removeUpdates(this);
+		
 		if(!connect_status)
 				threadhandler.removeCallbacks(check_connect_status_runnable);
 		if(threadhandler!=null)	
@@ -125,9 +132,17 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 				threadhandler.removeCallbacks(update_value);
 				
 			}
+		/*
 		if(mthread!=null)
 				mthread.quit();
-		
+				*/
+		/*
+		if(location_status==true)
+		{
+			locationManager.removeUpdates(this);
+			location_status=false;
+		}
+		*/
 
 	}
 	
@@ -207,7 +222,9 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 					get_item_list = connect_to_server("/project/mobilephone/check_item.php",nameValuePairs);
 					//json decode 
 					String key[]={"custom_id","store","item","number","StoreName","ItemName","GPS_Longitude","GPS_Latitude"};
-					item_list=json_deconde(get_item_list,key);
+					
+					if(get_item_list!=null)
+						item_list=json_deconde(get_item_list,key);
 					
 					for(int i=0;i<item_list.size();i++)
 						{
@@ -255,7 +272,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
  
 			     });
 			     */
-			     TurnOnLocationListener();
+			   
 			     
 			     threadhandler.postDelayed(update_value, 500);
 			     threadhandler.removeCallbacks(load_item);
@@ -280,14 +297,14 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						
 						if(item_list.get(i).get("number").equals(result)&&!item_list.get(i).containsKey("alert"))
 							{	
-								Log.v("debug", String.valueOf(i));
+								
 								item_list.get(i).put("alert","1");
 								
 								alert a=new alert();
 								a.setData(i,item_list.get(i).get("StoreName"),item_list.get(i).get("ItemName"));
 								MainActivity.this.runOnUiThread(a);
 								
-								 item_list.get(i).put("alert_text","到號");
+								item_list.get(i).put("alert_text","到號");
 							}
 						
 						if(Integer.parseInt(item_list.get(i).get("number"))<Integer.parseInt(result))
@@ -325,6 +342,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 					    	((SimpleAdapter)list.getAdapter()).notifyDataSetChanged();
 							
 						}});
+					threadhandler.removeCallbacks(update_value);
 				 	threadhandler.postDelayed(update_value, 2000);
 				 	
 			}
@@ -355,6 +373,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     			String bestProvider = locationManager.getBestProvider(criteria, true);
     			Log.v("debug", bestProvider);
         		locationManager.requestLocationUpdates(bestProvider,0,0,this);
+        		location_status=true;
         	}
         else if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
         	{
@@ -398,10 +417,6 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     		  builder.setNeutralButton("確認", okclick);
     		  AlertDialog alert = builder.create();
     		  alert.show();
-    	
-    		 
-    		  
-    		
     	  }
     	}
 
@@ -513,9 +528,11 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     	
     }
 
-	public void onLocationChantoged(Location arg0) 
+	public void onLocationChanged(Location arg0) 
 	{	
-		if(!item_list.isEmpty())
+		
+
+		if(item_list!=null&&!item_list.isEmpty())
 			{
 				for(int i=0;i<item_list.size();i++)
 				{
@@ -523,7 +540,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 					double lng=Double.parseDouble(item_list.get(i).get("GPS_Longitude"));
 					double dis=getDistance(arg0.getLatitude(),lat,arg0.getLongitude(),lng);
 					item_list.get(i).put("Distance",String.valueOf(dis));
-					Log.v("debug", String.valueOf(dis));
+					
 				}
 			}
 		// TODO Auto-generated method stub
@@ -567,8 +584,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		return s;
 	}
 
-	public void onLocationChanged(Location arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+
+
+
 }

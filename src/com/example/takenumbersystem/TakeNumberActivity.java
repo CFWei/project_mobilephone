@@ -65,7 +65,7 @@ public class TakeNumberActivity extends Activity implements LocationListener {
     			criteria.setAccuracy(criteria.ACCURACY_MEDIUM);
     			
     			String bestProvider = locationManager.getBestProvider(criteria, true);
-    			Log.v("debug", bestProvider);
+    			
         		locationManager.requestLocationUpdates(bestProvider,0,0,this);
         	}
         else if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
@@ -194,7 +194,7 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 					{	
 						for(int j=0;j<key.length;j++)
 						{
-							Log.v("item", store_list.get(i).get(key[j]));
+						//	Log.v("item", store_list.get(i).get(key[j]));
 						}
 					}
 				if(store_list!=null)
