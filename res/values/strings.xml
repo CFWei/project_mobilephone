@@ -11,5 +11,6 @@
     <string name="totalvalue">總號碼：</string>
     <string name="distance">距離：</string>
     <string name="MyNumber">我的號碼:</string>
+    <string name="ChangeNumber">換號</string>
 
 </resources>

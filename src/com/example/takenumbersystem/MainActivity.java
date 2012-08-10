@@ -45,7 +45,10 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.method.DialerKeyListener;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -55,20 +58,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 @SuppressLint({ "NewApi", "NewApi" })
 public class MainActivity extends Activity implements OnClickListener,LocationListener{
-	static String ServerURL="http://192.168.20.161/";
+	static String ServerURL="http://192.168.0.100/";
 	private static final double EARTH_RADIUS = 6378137;
 	public static String UserIMEI;
 	public ArrayList<HashMap<String,String>> item_list=null;
-	private Handler main_thread_handler=new Handler();
+	private Handler main_thread_handler;
 	private Handler threadhandler;
 	private HandlerThread mthread;
+	private boolean ListViewSettingCheck=false;
 	public boolean connect_status=false,location_status=false;
 	ProgressDialog myDialog ;
 	private LocationManager locationManager;
 	
 	
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) 
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
@@ -76,6 +81,34 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
         
         Button takenumber=(Button)findViewById(R.id.takenumber);
         takenumber.setOnClickListener(this);
+        
+        main_thread_handler=new Handler()
+        {
+
+			@Override
+			public void handleMessage(Message msg) {
+				// TODO Auto-generated method stub
+				super.handleMessage(msg);
+				switch(msg.what)
+				{
+					case 1:
+						String MsgString = (String)msg.obj;
+						Toast.makeText(MainActivity.this,MsgString , Toast.LENGTH_SHORT).show();
+						break;
+					case 2: 
+						ListView list=(ListView) findViewById(R.id.listView1);
+						if(ListViewSettingCheck)
+							((SimpleAdapter)list.getAdapter()).notifyDataSetChanged();
+				    	break;
+				
+				}
+			}
+        	
+        	
+        };
+        
+        ListView list=(ListView) findViewById(R.id.listView1);
+        registerForContextMenu(list);
         
     }
     
@@ -92,8 +125,12 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		       
 		threadhandler=new Handler(mthread.getLooper());
 	
-		threadhandler.post(check_connect_status_runnable);
-		  TurnOnLocationListener();
+		//threadhandler.post(check_connect_status_runnable);
+		
+		Thread CheckConnectThread=new Thread(check_connect_status_runnable);
+		CheckConnectThread.start();
+		
+		TurnOnLocationListener();
 	}
     
 	@Override
@@ -145,7 +182,17 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		*/
 
 	}
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater inflater=getMenuInflater();
+		inflater.inflate(R.menu.itemmenu, menu);
+		
+	}
 	
+	
+	//檢查連線狀態的Runnable
 	private Runnable check_connect_status_runnable=new Runnable()
     {
 
@@ -154,10 +201,12 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 			if(check_connect_status())
 				{
 					connect_status=true;
-					threadhandler.post(load_item);
+					Thread LoadItemThread=new Thread(load_item);
+					LoadItemThread.start();
 				}
 			else
 				{
+				
 					/*
 				 MainActivity.this.runOnUiThread(new Runnable(){
 
@@ -184,7 +233,8 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						}});
 				 */
 				}
-			threadhandler.removeCallbacks(check_connect_status_runnable);
+			
+			
 		}	
 		
 		
@@ -208,13 +258,12 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     		
 		
 	}
-    
+    //讀取個人物品清單
 	private Runnable load_item=new Runnable()
     {	
     	private SimpleAdapter adapter;
     	public void run()
     	{	
-           
 			try {
 			    	ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
 			    	nameValuePairs.add(new BasicNameValuePair("custom_id",UserIMEI));
@@ -260,7 +309,9 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 			    	 			    		 R.layout.waitingitemistview,
 			    	 			    		 new String[] { "StoreName","number","ItemName","Now_Value","alert_text","Distance" },
 			    	 			    		 new int[] { R.id.textView1, R.id.textView3,R.id.textView4,R.id.textView2,R.id.alert,R.id.textView6} ));
+			    	 				ListViewSettingCheck=true;
 			    	 			}
+			    	 			
 			     			});
 			    /*
 			     MainActivity.this.runOnUiThread(new Runnable(){
@@ -274,8 +325,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 			     */
 			   
 			     
-			     threadhandler.postDelayed(update_value, 500);
-			     threadhandler.removeCallbacks(load_item);
+			     threadhandler.postDelayed(update_value, 1000);
 			 }
     	}
     };
@@ -317,7 +367,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						
 				 	}
 				 	
-				 	
+				 	/*
 				 	for(int i=delete_list_sp-1;i>=0;i--)
 				 		{	
 				 			int delete_item_num=delete_list[i]; 
@@ -332,18 +382,15 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 				 			item_list.remove(delete_item_num);
 				 		
 				 		}
-
+					*/
+				 	
 				 	delete_list_sp=0;
 				 	
-					MainActivity.this.runOnUiThread(new Runnable(){
-						public void run() 
-						{
-							ListView list=(ListView) findViewById(R.id.listView1);
-					    	((SimpleAdapter)list.getAdapter()).notifyDataSetChanged();
-							
-						}});
+				 	Message m=main_thread_handler.obtainMessage(2);
+				 	main_thread_handler.sendMessage(m);
+				 	
 					threadhandler.removeCallbacks(update_value);
-				 	threadhandler.postDelayed(update_value, 2000);
+				 	threadhandler.postDelayed(update_value, 3000);
 				 	
 			}
 			
@@ -365,10 +412,12 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     	
         locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
         
+
+        
         if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)&&locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
         	{	
         		Criteria criteria = new Criteria();
-    			criteria.setAccuracy(criteria.ACCURACY_MEDIUM);
+    			criteria.setAccuracy(criteria.ACCURACY_COARSE);
     			
     			String bestProvider = locationManager.getBestProvider(criteria, true);
     			Log.v("debug", bestProvider);
@@ -395,9 +444,9 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     	  private String StoreName,ItemName;
     	  public void setData(int data,String getStoreName,String getItemName) 
     	  {
-    	    num=data;
-    	    StoreName=getStoreName;
-    	    ItemName=getItemName;
+	    	    num=data;
+	    	    StoreName=getStoreName;
+	    	    ItemName=getItemName;
     	  }
 
     	  public void run() 
@@ -407,12 +456,10 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     		  builder.setTitle("到號通知");
     		  DialogInterface.OnClickListener okclick=new DialogInterface.OnClickListener()
     		  {
-
 				public void onClick(DialogInterface dialog, int which) {
 					// TODO Auto-generated method stub
 					
 				}
-    			  
     		  };
     		  builder.setNeutralButton("確認", okclick);
     		  AlertDialog alert = builder.create();
@@ -424,9 +471,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     {
 			
     	TelephonyManager telManager  = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-    	
     	return telManager.getDeviceId();
-    	
     }
     
     public void update_list(int position)
@@ -444,7 +489,6 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     			NetworkInfo network_info=cm.getActiveNetworkInfo();
     			if(network_info==null||network_info.isConnected()==false)
     				{
-						
 						//Toast.makeText(this, "網路狀態：關閉", Toast.LENGTH_SHORT).show();
     					return false;
 					
@@ -530,8 +574,6 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 
 	public void onLocationChanged(Location arg0) 
 	{	
-		
-
 		if(item_list!=null&&!item_list.isEmpty())
 			{
 				for(int i=0;i<item_list.size();i++)
@@ -539,7 +581,8 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 					double lat=Double.parseDouble(item_list.get(i).get("GPS_Latitude"));
 					double lng=Double.parseDouble(item_list.get(i).get("GPS_Longitude"));
 					double dis=getDistance(arg0.getLatitude(),lat,arg0.getLongitude(),lng);
-					item_list.get(i).put("Distance",String.valueOf(dis));
+					int RoundDistance=(int)Math.round(dis);
+					item_list.get(i).put("Distance",String.valueOf(RoundDistance));
 					
 				}
 			}

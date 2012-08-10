@@ -32,8 +32,11 @@ import android.provider.Settings;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -80,8 +83,14 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 				Toast.makeText(this, "請開啟定位服務", Toast.LENGTH_LONG).show();
 				startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));	//開啟設定頁面
 			  }
-        
-        	//myDialog= ProgressDialog.show(this,"抽號系統","讀取位置中",true);
+        myDialog= ProgressDialog.show(this,"抽號系統","讀取位置中",true,true,new OnCancelListener() {
+			
+			public void onCancel(DialogInterface dialog) {
+				Toast.makeText(TakeNumberActivity.this, "取消抽號程序", Toast.LENGTH_SHORT).show();
+				finish();
+			}
+		});
+        	
     }
     
    
@@ -97,7 +106,9 @@ public class TakeNumberActivity extends Activity implements LocationListener {
         getMenuInflater().inflate(R.menu.activity_take_number, menu);
         return true;
     }
-    
+	
+	
+	
     class location_message
 	{
     	Double longitude;
@@ -119,9 +130,16 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 		Double longitude = location.getLongitude();	//取得經度
 		Double latitude = location.getLatitude();//取得緯度
 		
-		//myDialog.dismiss();
+		myDialog.dismiss();
 		
-		myDialog= ProgressDialog.show(this,"抽號系統","搜尋附近店家",true);
+		myDialog= ProgressDialog.show(this,"抽號系統","搜尋附近店家",true,true,new OnCancelListener() {
+			
+			public void onCancel(DialogInterface dialog) {
+				Toast.makeText(TakeNumberActivity.this, "取消抽號程序", Toast.LENGTH_SHORT).show();
+				finish();
+				
+			}
+		});
 		mthread=new HandlerThread("name");
 		mthread.start();
 		       
@@ -184,6 +202,7 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 				if(get_store_list.equals("null"))
 				{
 					Toast.makeText(this, "找不到符合條件的店家", Toast.LENGTH_SHORT).show();
+					myDialog.dismiss();
 					return;
 					
 				}
