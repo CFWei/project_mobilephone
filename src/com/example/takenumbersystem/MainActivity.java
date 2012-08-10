@@ -53,12 +53,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 @SuppressLint({ "NewApi", "NewApi" })
 public class MainActivity extends Activity implements OnClickListener,LocationListener{
-	static String ServerURL="http://192.168.0.100/";
+	static String ServerURL="http://192.168.1.200/";
 	private static final double EARTH_RADIUS = 6378137;
 	public static String UserIMEI;
 	public ArrayList<HashMap<String,String>> item_list=null;
@@ -79,8 +80,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
         
         UserIMEI=getIMEI();
         
-        Button takenumber=(Button)findViewById(R.id.takenumber);
-        takenumber.setOnClickListener(this);
+
         
         main_thread_handler=new Handler()
         {
@@ -89,10 +89,10 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 			public void handleMessage(Message msg) {
 				// TODO Auto-generated method stub
 				super.handleMessage(msg);
+				String MsgString = (String)msg.obj;
 				switch(msg.what)
 				{
 					case 1:
-						String MsgString = (String)msg.obj;
 						Toast.makeText(MainActivity.this,MsgString , Toast.LENGTH_SHORT).show();
 						break;
 					case 2: 
@@ -100,6 +100,14 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						if(ListViewSettingCheck)
 							((SimpleAdapter)list.getAdapter()).notifyDataSetChanged();
 				    	break;
+					case 3:
+						ProgressBar MainActivityProgressBar=(ProgressBar)findViewById(R.id.MainActivityProgressBar);
+						MainActivityProgressBar.setVisibility(ProgressBar.INVISIBLE);
+						break;
+					case 4:
+						TextView Message=(TextView)findViewById(R.id.MainActivityMessage);
+						Message.setText(MsgString);
+						break;
 				
 				}
 			}
@@ -201,13 +209,19 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 			if(check_connect_status())
 				{
 					connect_status=true;
+					
+			        Button takenumber=(Button)findViewById(R.id.takenumber);
+			        takenumber.setOnClickListener(MainActivity.this);
+					
 					Thread LoadItemThread=new Thread(load_item);
 					LoadItemThread.start();
 				}
 			else
 				{
-				
-					/*
+					
+				 	Message m=main_thread_handler.obtainMessage(3);
+				 	main_thread_handler.sendMessage(m);
+				 	/*
 				 MainActivity.this.runOnUiThread(new Runnable(){
 
 						public void run() {
@@ -283,11 +297,14 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 							
 						}
 
-			    } catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
+			    } catch (ClientProtocolException e) 
+			    {
+					 Message m=main_thread_handler.obtainMessage(1,"ClientProtocolException");
+					 main_thread_handler.sendMessage(m);
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				 Message m=main_thread_handler.obtainMessage(1,"IOException");
+				 main_thread_handler.sendMessage(m);
 				e.printStackTrace();
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -324,7 +341,9 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 			     });
 			     */
 			   
-			     
+				 Message m=main_thread_handler.obtainMessage(3);
+				 main_thread_handler.sendMessage(m);
+				 
 			     threadhandler.postDelayed(update_value, 1000);
 			 }
     	}
@@ -484,12 +503,15 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     public boolean check_connect_status()
     {	
     	try {	
-    			
+		 		Message ma=main_thread_handler.obtainMessage(1,"try!");
+		 		main_thread_handler.sendMessage(ma);
     			ConnectivityManager cm=(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     			NetworkInfo network_info=cm.getActiveNetworkInfo();
     			if(network_info==null||network_info.isConnected()==false)
     				{
 						//Toast.makeText(this, "網路狀態：關閉", Toast.LENGTH_SHORT).show();
+					 	Message m=main_thread_handler.obtainMessage(4,"請開啟網路");
+					 	main_thread_handler.sendMessage(m);
     					return false;
 					
     				}
@@ -507,13 +529,14 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 				else
 					{
 						//Toast.makeText(this, "not connect", Toast.LENGTH_SHORT).show();
+
 						return false;
 					}
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+	 		Message m=main_thread_handler.obtainMessage(4,"無法連接至主機");
+	 		main_thread_handler.sendMessage(m);
 			e.printStackTrace();
 		}
     	

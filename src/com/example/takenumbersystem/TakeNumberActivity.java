@@ -230,7 +230,7 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 									store_list,
 	    	 			    		R.layout.storelistview,
 	    	 			    		new String[] { "StoreName","StoreAddress","distance"},
-	    	 			    		new int[] { R.id.textView1,  R.id.textView2,R.id.textView3} ));
+	    	 			    		new int[] { R.id.StoreNameTextView,  R.id.AddressTextView,R.id.DistanceTextView} ));
 							
 						}
 						

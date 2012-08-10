@@ -1,36 +1,65 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/MainActivityFrameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="450dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:orientation="vertical" >
-
-        <ListView
-            android:id="@+id/listView1"
-            android:layout_width="match_parent"
-            android:layout_height="434dp" >
-        </ListView>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/MainActivityButtonLayout"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:orientation="vertical" >
+        android:layout_height="match_parent" >
 
-        <Button
-            android:id="@+id/takenumber"
+        <RelativeLayout
+            android:id="@+id/RelativeLayout1"
+            android:layout_width="wrap_content"
+            android:layout_height="450dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:orientation="vertical" >
+
+            <ListView
+                android:id="@+id/listView1"
+                android:layout_width="match_parent"
+                android:layout_height="450dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true" >
+            </ListView>
+
+            <ProgressBar
+                android:id="@+id/MainActivityProgressBar"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="101dp"
+                android:layout_height="101dp"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:visibility="visible" />
+
+            <TextView
+                android:id="@+id/MainActivityMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:textSize="30dp"
+                android:text="" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/MainActivityButtonLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/TakeNumber" />
-    </LinearLayout>
+            android:layout_height="70dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:orientation="vertical" >
 
-</RelativeLayout>
+            <Button
+                android:id="@+id/takenumber"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/TakeNumber"
+                android:textSize="35dp" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</FrameLayout>

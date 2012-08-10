@@ -1,66 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/LinearLayout1"
+    android:id="@+id/StoreListLinearLayout"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
-    <RelativeLayout
-        android:id="@+id/relativeLayout2"
+    <LinearLayout
+        android:id="@+id/StoreListContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.06" >
+        android:layout_height="71dp"
+        android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+        <RelativeLayout
+            android:id="@+id/StoreListRelativeLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
 
-        <TextView
-            android:id="@+id/distance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/textView1"
-            android:layout_alignBottom="@+id/textView1"
-            android:layout_marginLeft="23dp"
-            android:layout_toRightOf="@+id/textView1"
-            android:text="@string/distance" />
+            <TextView
+                android:id="@+id/StoreNameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView"
+                android:textSize="30dp"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/distance"
-            android:layout_alignBottom="@+id/distance"
-            android:layout_toRightOf="@+id/distance"
-            android:text="TextView" />
+            <TextView
+                android:id="@+id/distance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/StoreNameTextView"
+                android:layout_alignBottom="@+id/StoreNameTextView"
+                android:layout_marginLeft="23dp"
+                android:layout_toRightOf="@+id/StoreNameTextView"
+                android:text="@string/distance" />
 
-         <TextView
-             android:id="@+id/meter"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_alignBaseline="@+id/textView3"
-             android:layout_alignBottom="@+id/textView3"
-             android:layout_toRightOf="@+id/textView3"
-             android:text="m" />
+            <TextView
+                android:id="@+id/DistanceTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/distance"
+                android:layout_alignBottom="@+id/distance"
+                android:layout_toRightOf="@+id/distance"
+                android:text="TextView" />
 
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/meter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/DistanceTextView"
+                android:layout_alignBottom="@+id/DistanceTextView"
+                android:layout_toRightOf="@+id/DistanceTextView"
+                android:text="m" />
+        </RelativeLayout>
 
-     <RelativeLayout
-        android:id="@+id/relativeLayout3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.06" >
+        <RelativeLayout
+            android:id="@+id/StoreListRelativeLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
 
-         <TextView
-             android:id="@+id/textView2"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_alignParentTop="true"
-             android:text="TextView" />
-
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/AddressTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:text="TextView"
+                android:textSize="18dp" />
+        </RelativeLayout>
+    </LinearLayout>
 
 </LinearLayout>
