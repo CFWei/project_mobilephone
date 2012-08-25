@@ -26,6 +26,7 @@ import android.R.integer;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -49,6 +50,7 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -59,7 +61,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 @SuppressLint({ "NewApi", "NewApi" })
 public class MainActivity extends Activity implements OnClickListener,LocationListener{
-	static String ServerURL="http://192.168.1.200/";
+	static String ServerURL="http://192.168.0.100/";
 	private static final double EARTH_RADIUS = 6378137;
 	public static String UserIMEI;
 	public ArrayList<HashMap<String,String>> item_list=null;
@@ -193,13 +195,59 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		MenuInflater inflater=getMenuInflater();
-		inflater.inflate(R.menu.itemmenu, menu);
 		
+		super.onCreateContextMenu(menu, v, menuInfo);
+		menu.add(0, 0, 0, "換號");
+		
+
 	}
 	
 	
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		
+		switch(item.getItemId())
+		{
+			case 0:
+				ChangeNumber();
+				break;
+		}
+		
+		
+		return super.onContextItemSelected(item);
+	}
+	
+	public void ChangeNumber()
+	{
+		Builder MyAlertDialog = new AlertDialog.Builder(this);
+		MyAlertDialog.setTitle("換號系統");
+		MyAlertDialog.setMessage("請選擇你要向前換號/向後換號");
+		MyAlertDialog.setPositiveButton("向前",new DialogInterface.OnClickListener() {
+			
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				
+			}
+		} );
+		MyAlertDialog.setNeutralButton("向後",new DialogInterface.OnClickListener() {
+			
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				
+			}
+		} );
+		MyAlertDialog.setNegativeButton("取消",new DialogInterface.OnClickListener() {
+			
+			public void onClick(DialogInterface dialog, int which) {
+			
+				
+			}
+		});
+		MyAlertDialog.show();
+		
+	}
+	
+
 	//檢查連線狀態的Runnable
 	private Runnable check_connect_status_runnable=new Runnable()
     {
@@ -247,11 +295,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						}});
 				 */
 				}
-			
-			
-		}	
-		
-		
+		}		
     };
 
 	@Override
@@ -268,9 +312,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     			intent.setClass(this,TakeNumberActivity.class);
     			startActivity(intent);	
     		
-    		}
-    		
-		
+    		}			
 	}
     //讀取個人物品清單
 	private Runnable load_item=new Runnable()
@@ -340,7 +382,6 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
  
 			     });
 			     */
-			   
 				 Message m=main_thread_handler.obtainMessage(3);
 				 main_thread_handler.sendMessage(m);
 				 
@@ -503,8 +544,8 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     public boolean check_connect_status()
     {	
     	try {	
-		 		Message ma=main_thread_handler.obtainMessage(1,"try!");
-		 		main_thread_handler.sendMessage(ma);
+		 		//Message ma=main_thread_handler.obtainMessage(1,"try!");
+		 		//main_thread_handler.sendMessage(ma);
     			ConnectivityManager cm=(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     			NetworkInfo network_info=cm.getActiveNetworkInfo();
     			if(network_info==null||network_info.isConnected()==false)
