@@ -53,6 +53,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -205,11 +206,16 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
+		 
+		 //擷取是哪個位置的Item被select
+		 AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		 int ItemPosition = info.position;
+		 
 		
 		switch(item.getItemId())
 		{
 			case 0:
-				ChangeNumber();
+				ChangeNumber(ItemPosition);
 				break;
 		}
 		
@@ -217,37 +223,89 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		return super.onContextItemSelected(item);
 	}
 	
-	public void ChangeNumber()
+	public void ChangeNumber(int ItemPosition)
 	{
+		final int Position=ItemPosition;
 		Builder MyAlertDialog = new AlertDialog.Builder(this);
 		MyAlertDialog.setTitle("換號系統");
 		MyAlertDialog.setMessage("請選擇你要向前換號/向後換號");
+		
 		MyAlertDialog.setPositiveButton("向前",new DialogInterface.OnClickListener() {
 			
-			public void onClick(DialogInterface dialog, int which) {
-				// TODO Auto-generated method stub
+			public void onClick(DialogInterface dialog, int which) 
+			{	
+				SendChangeNumberRequest SCNR=new SendChangeNumberRequest();
+				SCNR.setdata(1, Position);
+				Thread SendChangeNumberRequestThread=new Thread(SCNR);
+				SendChangeNumberRequestThread.start();
 				
 			}
 		} );
+		
 		MyAlertDialog.setNeutralButton("向後",new DialogInterface.OnClickListener() {
 			
-			public void onClick(DialogInterface dialog, int which) {
-				// TODO Auto-generated method stub
+			public void onClick(DialogInterface dialog, int which) 
+			{
+				SendChangeNumberRequest SCNR=new SendChangeNumberRequest();
+				SCNR.setdata(2, Position);
+				Thread SendChangeNumberRequestThread=new Thread(SCNR);
+				SendChangeNumberRequestThread.start();
 				
 			}
 		} );
+		
 		MyAlertDialog.setNegativeButton("取消",new DialogInterface.OnClickListener() {
 			
 			public void onClick(DialogInterface dialog, int which) {
 			
-				
+		
 			}
 		});
 		MyAlertDialog.show();
 		
 	}
 	
-
+	
+	private class SendChangeNumberRequest implements Runnable{
+		private int Choose;
+		private int ItemPosition;
+		
+		public void setdata(int Choose,int ItemPosition)
+		{
+			this.Choose=Choose;//1:向前 2:向後
+			this.ItemPosition=ItemPosition;
+			
+		}
+		public void run() 
+		{
+	    	try {
+	    			
+	    		String ItemID=item_list.get(ItemPosition).get("item");
+				String Store=item_list.get(ItemPosition).get("store");
+	    	 	ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
+		    	nameValuePairs.add(new BasicNameValuePair("CustomID",UserIMEI));
+		    	nameValuePairs.add(new BasicNameValuePair("ItemID",ItemID));
+		    	nameValuePairs.add(new BasicNameValuePair("Store",Store));
+		    	nameValuePairs.add(new BasicNameValuePair("Choose",Integer.toString(Choose)));
+				String result=connect_to_server("/project/mobilephone/ChangeNumberRequest.php",nameValuePairs);
+				
+				 Message m=main_thread_handler.obtainMessage(1,result);
+				 main_thread_handler.sendMessage(m);
+				
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			};
+	    	
+		}
+		
+		
+		
+	} 
+	
 	//檢查連線狀態的Runnable
 	private Runnable check_connect_status_runnable=new Runnable()
     {

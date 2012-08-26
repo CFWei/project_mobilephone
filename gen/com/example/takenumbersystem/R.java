@@ -21,7 +21,6 @@ public final class R {
     }
     public static final class id {
         public static final int AddressTextView=0x7f080019;
-        public static final int ChangeNumber=0x7f080022;
         public static final int DISTANCE=0x7f08001c;
         public static final int DistanceTextView=0x7f080016;
         public static final int LinearLayout1=0x7f080009;
@@ -68,7 +67,6 @@ public final class R {
         public static final int activity_main=0x7f070000;
         public static final int activity_select_item=0x7f070001;
         public static final int activity_take_number=0x7f070002;
-        public static final int itemmenu=0x7f070003;
     }
     public static final class string {
         public static final int ChangeNumber=0x7f05000b;
