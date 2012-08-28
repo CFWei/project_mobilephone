@@ -59,7 +59,6 @@ public class SelectItemActivity extends Activity {
 					item_list=json_deconde(get_item_list,key);
 					//Log.v("getitem",get_item_list);
 					
-					
 				} 
 			catch (ClientProtocolException e) {
 				e.printStackTrace();

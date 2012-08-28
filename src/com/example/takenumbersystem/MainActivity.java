@@ -111,6 +111,19 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						TextView Message=(TextView)findViewById(R.id.MainActivityMessage);
 						Message.setText(MsgString);
 						break;
+					case 5:
+						Bundle bundle = new Bundle();
+						int ItemPosition=Integer.parseInt(MsgString);
+						bundle.putString("ItemID",item_list.get(ItemPosition).get("item"));
+						bundle.putString("StoreID",item_list.get(ItemPosition).get("store")); 
+						Intent intent = new Intent();
+						intent.setClass(MainActivity.this,LookUpChangeNumberPage.class);
+						intent.putExtras(bundle);
+						startActivity(intent);
+						break;
+							 
+						 
+						 
 				
 				}
 			}
@@ -198,7 +211,8 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 			ContextMenuInfo menuInfo) {
 		
 		super.onCreateContextMenu(menu, v, menuInfo);
-		menu.add(0, 0, 0, "換號");
+		menu.add(0, 0, 0, "換號申請");
+		//menu.add(0, 1, 0, "換號清單");
 		
 
 	}
@@ -216,6 +230,9 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		{
 			case 0:
 				ChangeNumber(ItemPosition);
+				break;
+			case 1:
+				Toast.makeText(MainActivity.this, "hello	", Toast.LENGTH_SHORT).show();
 				break;
 		}
 		
@@ -282,16 +299,18 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 	    			
 	    		String ItemID=item_list.get(ItemPosition).get("item");
 				String Store=item_list.get(ItemPosition).get("store");
+				
 	    	 	ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
 		    	nameValuePairs.add(new BasicNameValuePair("CustomID",UserIMEI));
 		    	nameValuePairs.add(new BasicNameValuePair("ItemID",ItemID));
 		    	nameValuePairs.add(new BasicNameValuePair("Store",Store));
 		    	nameValuePairs.add(new BasicNameValuePair("Choose",Integer.toString(Choose)));
 				String result=connect_to_server("/project/mobilephone/ChangeNumberRequest.php",nameValuePairs);
-				
-				 Message m=main_thread_handler.obtainMessage(1,result);
-				 main_thread_handler.sendMessage(m);
-				
+			
+				Message m=main_thread_handler.obtainMessage(5,Integer.toString(ItemPosition));
+
+				main_thread_handler.sendMessage(m);
+
 			} catch (ClientProtocolException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
