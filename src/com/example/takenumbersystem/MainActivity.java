@@ -62,7 +62,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 @SuppressLint({ "NewApi", "NewApi" })
 public class MainActivity extends Activity implements OnClickListener,LocationListener{
-	static String ServerURL="http://192.168.0.100/";
+	static String ServerURL="http://192.168.0.106/";
 	private static final double EARTH_RADIUS = 6378137;
 	public static String UserIMEI;
 	public ArrayList<HashMap<String,String>> item_list=null;
@@ -121,10 +121,6 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						intent.putExtras(bundle);
 						startActivity(intent);
 						break;
-							 
-						 
-						 
-				
 				}
 			}
         	
@@ -155,6 +151,10 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		CheckConnectThread.start();
 		
 		TurnOnLocationListener();
+		
+		Message m=main_thread_handler.obtainMessage(4,"");
+ 		main_thread_handler.sendMessage(m);
+		
 	}
     
 	@Override
@@ -404,18 +404,48 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 					get_item_list = connect_to_server("/project/mobilephone/check_item.php",nameValuePairs);
 					//json decode 
 					String key[]={"custom_id","store","item","number","StoreName","ItemName","GPS_Longitude","GPS_Latitude"};
-					
-					if(get_item_list!=null)
+					if(get_item_list!=null && !get_item_list.equals("null"))
+					{
 						item_list=json_deconde(get_item_list,key);
 					
-					for(int i=0;i<item_list.size();i++)
+						for(int i=0;i<item_list.size();i++)
 						{
 							item_list.get(i).put("Now_Value","");
 							item_list.get(i).put("alert_text", "");
 							item_list.get(i).put("Distance", "定位中");
 							
 						}
-
+						 ListView list = (ListView) findViewById(R.id.listView1);
+					     list.post(new Runnable()
+					     			{
+					    	 			public void run() 
+					    	 			{
+					    	 				ListView list = (ListView) findViewById(R.id.listView1);
+					    	 				
+					    	 				list.setAdapter(new SimpleAdapter( 
+					    	 						 MainActivity.this, 
+					    	 			    		 item_list,
+					    	 			    		 R.layout.waitingitemistview,
+					    	 			    		 new String[] { "StoreName","number","ItemName","Now_Value","alert_text","Distance" },
+					    	 			    		 new int[] { R.id.textView1, R.id.textView3,R.id.textView4,R.id.textView2,R.id.alert,R.id.textView6} ));
+					    	 				ListViewSettingCheck=true;
+					    	 			}
+					    	 			
+					     			});
+					     Message m=main_thread_handler.obtainMessage(3);
+						 main_thread_handler.sendMessage(m);
+						 
+					     threadhandler.postDelayed(update_value, 1000);
+					}
+					else
+					{
+						Message m=main_thread_handler.obtainMessage(4,"目前沒有商品");
+				 		main_thread_handler.sendMessage(m);
+				 		m=main_thread_handler.obtainMessage(3);
+						 main_thread_handler.sendMessage(m);
+					}
+					
+					
 			    } catch (ClientProtocolException e) 
 			    {
 					 Message m=main_thread_handler.obtainMessage(1,"ClientProtocolException");
@@ -429,41 +459,6 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if(item_list!=null)
-			 {	
-				
-				 ListView list = (ListView) findViewById(R.id.listView1);
-			     list.post(new Runnable()
-			     			{
-			    	 			public void run() 
-			    	 			{
-			    	 				ListView list = (ListView) findViewById(R.id.listView1);
-			    	 				
-			    	 				list.setAdapter(new SimpleAdapter( 
-			    	 						 MainActivity.this, 
-			    	 			    		 item_list,
-			    	 			    		 R.layout.waitingitemistview,
-			    	 			    		 new String[] { "StoreName","number","ItemName","Now_Value","alert_text","Distance" },
-			    	 			    		 new int[] { R.id.textView1, R.id.textView3,R.id.textView4,R.id.textView2,R.id.alert,R.id.textView6} ));
-			    	 				ListViewSettingCheck=true;
-			    	 			}
-			    	 			
-			     			});
-			    /*
-			     MainActivity.this.runOnUiThread(new Runnable(){
-
-					public void run() {
-						myDialog.dismiss();
-						
-					}
- 
-			     });
-			     */
-				 Message m=main_thread_handler.obtainMessage(3);
-				 main_thread_handler.sendMessage(m);
-				 
-			     threadhandler.postDelayed(update_value, 1000);
-			 }
     	}
     };
     
@@ -477,49 +472,58 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 			
 				 	for(int i=0;i<item_list.size();i++)
 				 	{	
+				 		//連結到Server做更新
 						ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
 						nameValuePairs.add(new BasicNameValuePair("store",item_list.get(i).get("store")));
 						nameValuePairs.add(new BasicNameValuePair("item",item_list.get(i).get("item")));
+						nameValuePairs.add(new BasicNameValuePair("number",item_list.get(i).get("number")));
+						nameValuePairs.add(new BasicNameValuePair("CustomID",UserIMEI));
 						String result=connect_to_server("/project/mobilephone/update_value.php",nameValuePairs);
 						
-						if(item_list.get(i).get("number").equals(result)&&!item_list.get(i).containsKey("alert"))
+						String[] key={"NowValue","ItemLife"};
+						ArrayList<HashMap<String,String>> temp;
+						temp=json_deconde(result, key);
+						
+						String NowValue=temp.get(0).get("NowValue");
+						String ItemLife=temp.get(0).get("ItemLife");
+						
+						if(item_list.get(i).get("number").equals(NowValue)&&!item_list.get(i).containsKey("alert"))
 							{	
-								
-								item_list.get(i).put("alert","1");
-								
+								item_list.get(i).put("alert","1");	
 								alert a=new alert();
 								a.setData(i,item_list.get(i).get("StoreName"),item_list.get(i).get("ItemName"));
 								MainActivity.this.runOnUiThread(a);
 								
 								item_list.get(i).put("alert_text","到號");
 							}
-						
-						if(Integer.parseInt(item_list.get(i).get("number"))<Integer.parseInt(result))
+
+						if(!ItemLife.equals("0"))
 							{
 								delete_list[delete_list_sp]=i;
 								delete_list_sp++;	
 							}
 						
-						item_list.get(i).put("Now_Value", result);
+						item_list.get(i).put("Now_Value", NowValue);
 						
 				 	}
 				 	
-				 	/*
+				 	
 				 	for(int i=delete_list_sp-1;i>=0;i--)
 				 		{	
+				 			
 				 			int delete_item_num=delete_list[i]; 
-
+				 			/*
 				 			ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
 							nameValuePairs.add(new BasicNameValuePair("Store",item_list.get(delete_item_num).get("store")));
 							nameValuePairs.add(new BasicNameValuePair("Item",item_list.get(delete_item_num).get("item")));
 							nameValuePairs.add(new BasicNameValuePair("Number",item_list.get(delete_item_num).get("number")));
 							nameValuePairs.add(new BasicNameValuePair("UserIMEI",UserIMEI));
 							connect_to_server("/project/mobilephone/del_item.php",nameValuePairs);
-							
+							*/
 				 			item_list.remove(delete_item_num);
 				 		
 				 		}
-					*/
+					
 				 	
 				 	delete_list_sp=0;
 				 	
@@ -527,7 +531,8 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 				 	main_thread_handler.sendMessage(m);
 				 	
 					threadhandler.removeCallbacks(update_value);
-				 	threadhandler.postDelayed(update_value, 3000);
+					if(item_list.size()!=0)
+						threadhandler.postDelayed(update_value, 3000);
 				 	
 			}
 			
@@ -536,6 +541,9 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 				e.printStackTrace();
 			} 
 			catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
