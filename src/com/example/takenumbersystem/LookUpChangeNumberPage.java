@@ -90,20 +90,17 @@ public class LookUpChangeNumberPage extends Activity {
         
         
     }
-    
-    
-    
+
     @Override
 	protected void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
 		Thread GetChangeNumberListThread=new Thread(GetChangeNumberList);
 		GetChangeNumberListThread.start();
-		
 	}
 
-    private Runnable GetChangeNumberList=new Runnable() {
-		
+    private Runnable GetChangeNumberList=new Runnable() 
+    {	
 		public void run() 
 		{
 
@@ -112,8 +109,7 @@ public class LookUpChangeNumberPage extends Activity {
 				nameValuePairs.add(new BasicNameValuePair("ItemID",ItemID));
 				nameValuePairs.add(new BasicNameValuePair("StoreID",StoreID));
 		    	nameValuePairs.add(new BasicNameValuePair("CustomID",MainActivity.UserIMEI));
-		    
-		    	
+
 				String result=connect_to_server("/project/mobilephone/LookUpChangeNumberList.php",nameValuePairs);
 				//Log.v("debug", result);
 				if(result.equals("-1"))

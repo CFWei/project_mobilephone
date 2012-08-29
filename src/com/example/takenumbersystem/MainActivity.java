@@ -62,7 +62,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 @SuppressLint({ "NewApi", "NewApi" })
 public class MainActivity extends Activity implements OnClickListener,LocationListener{
-	static String ServerURL="http://192.168.0.106/";
+	static String ServerURL="http://192.168.20.161/";
 	private static final double EARTH_RADIUS = 6378137;
 	public static String UserIMEI;
 	public ArrayList<HashMap<String,String>> item_list=null;
@@ -82,9 +82,6 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
         setContentView(R.layout.activity_main);
         
         UserIMEI=getIMEI();
-        
-
-        
         main_thread_handler=new Handler()
         {
 
@@ -123,8 +120,6 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						break;
 				}
 			}
-        	
-        	
         };
         
         ListView list=(ListView) findViewById(R.id.listView1);
@@ -667,11 +662,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		}
     	
     	return false;
-    	
-		
-    	
-    	
-    	
+	
     }
 
     public String connect_to_server(String program,ArrayList<NameValuePair> nameValuePairs) throws ClientProtocolException, IOException
@@ -715,8 +706,6 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 	     	 item.add(temp);
 	     	 //Toast.makeText(this, json_data.getString(key[2]), Toast.LENGTH_SHORT).show();
 		}
-		
-	
 		return item;
     	
     }
@@ -775,8 +764,6 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		
 		return s;
 	}
-
-
 
 
 }
