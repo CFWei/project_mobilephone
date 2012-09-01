@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/LinearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dip" 
+            android:layout_weight="0.6">
+
+            <TextView
+                android:id="@+id/NumberText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:textSize="30dp"
+                android:text="@string/NumberText" />
+
+            <TextView
+                android:id="@+id/NumberValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/NumberText"
+                android:textSize="30dp"
+                android:text="" />
+            
+        </RelativeLayout>
+		
+		<RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dip" 
+            android:layout_weight="0.4">
+
+			<TextView
+			    android:id="@+id/OwnerText"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_alignParentLeft="true"
+			    android:layout_centerVertical="true"
+			    android:text="@string/OwnerText" />
+
+			<TextView
+			    android:id="@+id/OwnerValue"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_centerVertical="true"
+			    android:layout_toRightOf="@+id/OwnerText"
+			    android:text="" />
+            
+        </RelativeLayout>
+    </LinearLayout>
+
+</LinearLayout>

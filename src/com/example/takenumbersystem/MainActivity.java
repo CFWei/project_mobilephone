@@ -21,7 +21,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-
 import android.R.integer;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -48,12 +47,16 @@ import android.text.method.DialerKeyListener;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -62,13 +65,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 @SuppressLint({ "NewApi", "NewApi" })
 public class MainActivity extends Activity implements OnClickListener,LocationListener{
-	static String ServerURL="http://192.168.20.161/";
+	static String ServerURL="http://192.168.0.100/";
 	private static final double EARTH_RADIUS = 6378137;
 	public static String UserIMEI;
 	public ArrayList<HashMap<String,String>> item_list=null;
 	private Handler main_thread_handler;
 	private Handler threadhandler;
 	private HandlerThread mthread;
+	private ItemAdapter itemadapter;
 	private boolean ListViewSettingCheck=false;
 	public boolean connect_status=false,location_status=false;
 	ProgressDialog myDialog ;
@@ -98,7 +102,8 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 					case 2: 
 						ListView list=(ListView) findViewById(R.id.listView1);
 						if(ListViewSettingCheck)
-							((SimpleAdapter)list.getAdapter()).notifyDataSetChanged();
+							((ItemAdapter)list.getAdapter()).notifyDataSetChanged();
+						
 				    	break;
 					case 3:
 						ProgressBar MainActivityProgressBar=(ProgressBar)findViewById(R.id.MainActivityProgressBar);
@@ -117,6 +122,28 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						intent.setClass(MainActivity.this,LookUpChangeNumberPage.class);
 						intent.putExtras(bundle);
 						startActivity(intent);
+						break;
+					case 6:
+						ListView List = (ListView) findViewById(R.id.listView1);
+    	 				itemadapter=new ItemAdapter(MainActivity.this,item_list);
+    	 				List.setAdapter(itemadapter);
+    	 				ListViewSettingCheck=true;
+						break;
+					case 7:
+						int position=Integer.parseInt(MsgString);
+						AlertDialog.Builder builder=new AlertDialog.Builder(MainActivity.this);
+						builder.setTitle("換號成功");
+						builder.setMessage("商品: "+item_list.get(position).get("ItemName")+" 換號成功");
+						builder.setPositiveButton("確認", new AlertDialog.OnClickListener() {
+							
+							public void onClick(DialogInterface dialog, int which) 
+							{
+								
+								
+							}
+						});
+						AlertDialog alert = builder.create();
+			    		alert.show();
 						break;
 				}
 			}
@@ -206,8 +233,25 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 			ContextMenuInfo menuInfo) {
 		
 		super.onCreateContextMenu(menu, v, menuInfo);
-		menu.add(0, 0, 0, "換號申請");
-		//menu.add(0, 1, 0, "換號清單");
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+		int ItemPosition = info.position;
+		if(item_list.get(ItemPosition).get("ChangeNumberCheck").equals("0"))
+			menu.add(0, 0, 0, "顯示換號清單");
+		else if(item_list.get(ItemPosition).get("ChangeNumberCheck").equals("1"))
+			{
+				menu.add(0, 1, 0, "取消換號配對");
+			
+			}
+		else if(item_list.get(ItemPosition).get("ChangeNumberCheck").equals("2"))
+			{
+				menu.add(0, 1, 1, "取消換號配對");
+				menu.add(0, 2, 0, "確認換號配對");
+			}	
+		else if(item_list.get(ItemPosition).get("ChangeNumberCheck").equals("3"))
+		{}
+		else
+			menu.add(0, 0, 0, "進入換號系統");
+		
 		
 
 	}
@@ -218,22 +262,241 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		 
 		 //擷取是哪個位置的Item被select
 		 AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-		 int ItemPosition = info.position;
+		 final int ItemPosition = info.position;
 		 
 		
 		switch(item.getItemId())
 		{
 			case 0:
-				ChangeNumber(ItemPosition);
+				CheckChangeNumberState CCNS=new CheckChangeNumberState();
+				CCNS.setdata(ItemPosition);
+				Thread CheckChangeNumberStateThread=new Thread(CCNS);
+				CheckChangeNumberStateThread.start();
 				break;
 			case 1:
-				Toast.makeText(MainActivity.this, "hello	", Toast.LENGTH_SHORT).show();
+				ImplementChangeNumber ICN=new ImplementChangeNumber();
+				ICN.setData(1,ItemPosition);
+				Thread ICNThread=new Thread(ICN);
+				ICNThread.start();
+				break;
+			case 2:
+				AlertDialog.Builder builder=new AlertDialog.Builder(MainActivity.this);
+				builder.setTitle("換號確認");
+				builder.setMessage("你確定要換號?");
+				builder.setPositiveButton("確認", new AlertDialog.OnClickListener() {
+					
+					public void onClick(DialogInterface dialog, int which) 
+					{
+						ImplementChangeNumber ICN=new ImplementChangeNumber();
+						ICN.setData(2,ItemPosition);
+						Thread ICNThread=new Thread(ICN);
+						ICNThread.start();
+						
+					}
+				});
+				builder.setNegativeButton("取消", new AlertDialog.OnClickListener() {
+					
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				AlertDialog alert = builder.create();
+	    		alert.show();
+				
 				break;
 		}
 		
 		
 		return super.onContextItemSelected(item);
 	}
+	
+	private class ImplementChangeNumber implements Runnable
+	{	
+		
+		//1：取消配對 //2:接受配對 //3:完成換號並移除
+		private int choose;
+		private int ItemPosition;
+		
+		public void setData(int choose,int ItemPosition)
+		{
+			this.choose=choose;
+			this.ItemPosition=ItemPosition;
+		}
+		
+		public void run() 
+		{
+			if(choose==1)
+			{
+				CancelChangeNumber();
+			}
+			if(choose==2)
+			{
+				AcceptChangeNumber();
+				
+			}
+			if(choose==3)
+			{
+				DeleteChangeNumber();
+				
+			}
+			
+		}
+		public void DeleteChangeNumber()
+		{
+			try {
+				String ItemID=item_list.get(ItemPosition).get("item");
+				String Store=item_list.get(ItemPosition).get("store");
+						
+				ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
+				nameValuePairs.add(new BasicNameValuePair("CustomID",UserIMEI));
+				nameValuePairs.add(new BasicNameValuePair("ItemID",ItemID));
+				nameValuePairs.add(new BasicNameValuePair("Store",Store));
+				String result=connect_to_server("/project/mobilephone/DeleteChangeNumber.php",nameValuePairs);
+				
+				
+				
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		public void AcceptChangeNumber()
+		{
+			
+	    	
+	    	try {
+	    		String ItemID=item_list.get(ItemPosition).get("item");
+				String Store=item_list.get(ItemPosition).get("store");
+				
+				ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
+		    	nameValuePairs.add(new BasicNameValuePair("CustomID",UserIMEI));
+		       	nameValuePairs.add(new BasicNameValuePair("ItemID",ItemID));
+		    	nameValuePairs.add(new BasicNameValuePair("Store",Store));
+				String result=connect_to_server("/project/mobilephone/AcceptChangeNumber.php",nameValuePairs);
+				Log.v("debug", result);
+				if(result.equals("1"))
+				{
+					
+					
+				}
+				
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+		public void CancelChangeNumber()
+		{
+			
+	    	
+	    	try {
+	    		String ItemID=item_list.get(ItemPosition).get("item");
+				String Store=item_list.get(ItemPosition).get("store");
+				
+				ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
+		    	nameValuePairs.add(new BasicNameValuePair("CustomID",UserIMEI));
+		       	nameValuePairs.add(new BasicNameValuePair("ItemID",ItemID));
+		    	nameValuePairs.add(new BasicNameValuePair("Store",Store));
+		    	
+				String result=connect_to_server("/project/mobilephone/CancelChangeNumber.php",nameValuePairs);
+				
+				if(result.equals("1"))
+				{
+					Message m=main_thread_handler.obtainMessage(1,"取消換號配對成功");
+					main_thread_handler.sendMessage(m);
+				}
+				else
+				{
+					Message m=main_thread_handler.obtainMessage(1,"取消換號配對失敗");
+					main_thread_handler.sendMessage(m);
+					
+				}
+				
+				
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+		
+	}
+	private class CheckChangeNumberState implements Runnable
+	{	
+		private int ItemPosition;
+		public void setdata(int ItemPosition)
+		{
+			this.ItemPosition=ItemPosition;
+			
+		}
+		public void run() 
+		{	
+	    	try {
+				String ItemID=item_list.get(ItemPosition).get("item");
+				String Store=item_list.get(ItemPosition).get("store");
+				
+				ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
+		    	nameValuePairs.add(new BasicNameValuePair("CustomID",UserIMEI));
+		       	nameValuePairs.add(new BasicNameValuePair("ItemID",ItemID));
+		    	nameValuePairs.add(new BasicNameValuePair("Store",Store));
+				String result=connect_to_server("/project/mobilephone/CheckChangeNumberState.php",nameValuePairs);
+				if(result.equals("0"))
+				{
+					MainActivity.this.runOnUiThread(new Runnable() 
+					{
+						public void run() 
+						{
+							ChangeNumber(ItemPosition);
+							
+						}
+					});
+					
+				}
+				else
+				{
+					if(item_list.get(ItemPosition).get("ChangeNumberCheck").equals("1")||item_list.get(ItemPosition).get("ChangeNumberCheck").equals("2"))
+					{
+						Message m=main_thread_handler.obtainMessage(1,"已進行配對,請稍候");
+						main_thread_handler.sendMessage(m);
+						
+					}
+					else	
+					{	
+						Message m=main_thread_handler.obtainMessage(5,Integer.toString(ItemPosition));
+						main_thread_handler.sendMessage(m);
+					}
+				}
+				
+				
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    	
+    		
+		}
+
+	}
+	
+	
+	
 	
 	public void ChangeNumber(int ItemPosition)
 	{
@@ -278,7 +541,8 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 	}
 	
 	
-	private class SendChangeNumberRequest implements Runnable{
+	private class SendChangeNumberRequest implements Runnable
+	{
 		private int Choose;
 		private int ItemPosition;
 		
@@ -408,29 +672,40 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 							item_list.get(i).put("Now_Value","");
 							item_list.get(i).put("alert_text", "");
 							item_list.get(i).put("Distance", "定位中");
+							item_list.get(i).put("ChangeNumberCheck", "");
 							
 						}
+						
+						Message m=main_thread_handler.obtainMessage(6);
+				 		main_thread_handler.sendMessage(m);
+						/*
 						 ListView list = (ListView) findViewById(R.id.listView1);
 					     list.post(new Runnable()
 					     			{
 					    	 			public void run() 
-					    	 			{
+					    	 			{	
 					    	 				ListView list = (ListView) findViewById(R.id.listView1);
+					    	 				itemadapter=new ItemAdapter(item_list);
+					    	 				list.setAdapter(itemadapter);
 					    	 				
-					    	 				list.setAdapter(new SimpleAdapter( 
-					    	 						 MainActivity.this, 
-					    	 			    		 item_list,
-					    	 			    		 R.layout.waitingitemistview,
-					    	 			    		 new String[] { "StoreName","number","ItemName","Now_Value","alert_text","Distance" },
-					    	 			    		 new int[] { R.id.textView1, R.id.textView3,R.id.textView4,R.id.textView2,R.id.alert,R.id.textView6} ));
+					    	 				//list.setAdapter(new SimpleAdapter( 
+					    	 				//		 MainActivity.this, 
+					    	 			    //		 item_list,
+					    	 			    //		 R.layout.waitingitemistview,
+					    	 			    //		 new String[] { "StoreName","number","ItemName","Now_Value","alert_text","Distance" },
+					    	 			    //		 new int[] { R.id.StoreName, R.id.MyValue,R.id.ItemName,R.id.NowValue,R.id.alert,R.id.DistanceValue} ));
+					    	 			
+					    	 				
+					    	 				
 					    	 				ListViewSettingCheck=true;
 					    	 			}
 					    	 			
 					     			});
-					     Message m=main_thread_handler.obtainMessage(3);
-						 main_thread_handler.sendMessage(m);
+					     			*/
+					    m=main_thread_handler.obtainMessage(3);
+						main_thread_handler.sendMessage(m);
 						 
-					     threadhandler.postDelayed(update_value, 1000);
+					    threadhandler.postDelayed(update_value, 1000);
 					}
 					else
 					{
@@ -441,10 +716,11 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 					}
 					
 					
-			    } catch (ClientProtocolException e) 
-			    {
-					 Message m=main_thread_handler.obtainMessage(1,"ClientProtocolException");
-					 main_thread_handler.sendMessage(m);
+			    } 
+			catch (ClientProtocolException e) 
+			 {
+				 Message m=main_thread_handler.obtainMessage(1,"ClientProtocolException");
+				 main_thread_handler.sendMessage(m);
 				e.printStackTrace();
 			} catch (IOException e) {
 				 Message m=main_thread_handler.obtainMessage(1,"IOException");
@@ -474,14 +750,25 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						nameValuePairs.add(new BasicNameValuePair("number",item_list.get(i).get("number")));
 						nameValuePairs.add(new BasicNameValuePair("CustomID",UserIMEI));
 						String result=connect_to_server("/project/mobilephone/update_value.php",nameValuePairs);
-						
-						String[] key={"NowValue","ItemLife"};
+						//json decode
+						String[] key={"NowValue","ItemLife","ChangeNumberCheck","ChangeNumber"};
 						ArrayList<HashMap<String,String>> temp;
 						temp=json_deconde(result, key);
 						
+						//擷取相關資料
 						String NowValue=temp.get(0).get("NowValue");
 						String ItemLife=temp.get(0).get("ItemLife");
+						String ChangeNumber=temp.get(0).get("ChangeNumber");
+						String ChangeNumberCheck=temp.get(0).get("ChangeNumberCheck");
 						
+						if(!ChangeNumber.equals("-1"))
+						{
+							item_list.get(i).put("ChangeNumber",ChangeNumber);
+							
+						}
+						
+						
+						//若到號則發出提醒
 						if(item_list.get(i).get("number").equals(NowValue)&&!item_list.get(i).containsKey("alert"))
 							{	
 								item_list.get(i).put("alert","1");	
@@ -491,15 +778,65 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 								
 								item_list.get(i).put("alert_text","到號");
 							}
-
+						
+						//若商品狀態不等於未服務 則刪除此商品
 						if(!ItemLife.equals("0"))
 							{
 								delete_list[delete_list_sp]=i;
 								delete_list_sp++;	
 							}
+				
+						//沒有要求換號 不做任何事
+						if(ChangeNumberCheck.equals("-1"))
+						{}
+						//有要求換號 但是還在等待
+						else if(ChangeNumberCheck.equals("0"))
+						{
+							item_list.get(i).put("ChangeNumberCheck","0");
+						}
+						else if(ChangeNumberCheck.equals("1"))
+						{
+							item_list.get(i).put("ChangeNumberCheck","1");
+							
+						}
+						//收到別人的換號要求
+						else if(ChangeNumberCheck.equals("2"))
+						{	
+							//如果還沒發出過換號提醒 則發出
+							if(!item_list.get(i).containsKey("ChangeNumberAlert"))
+								{	
+									
+									ChangeNumberAlert CNA=new ChangeNumberAlert();
+									CNA.setDate(item_list.get(i).get("item"), item_list.get(i).get("store"),i);
+									Thread ChangeNumberAlertThread = new Thread(CNA);
+									ChangeNumberAlertThread.start();
+									
+								}
+							
+							item_list.get(i).put("ChangeNumberAlert","1");
+							item_list.get(i).put("ChangeNumberCheck","2");
+						}
+						else if(ChangeNumberCheck.equals("3"))
+						{
+							Message m=main_thread_handler.obtainMessage(7,String.valueOf(i));
+					 		main_thread_handler.sendMessage(m);
+					 		item_list.get(i).put("ChangeNumberCheck","");
+					 		item_list.get(i).put("ChangeNumber","");
+					 		ImplementChangeNumber ICN=new ImplementChangeNumber();
+					 		ICN.setData(3, i);
+					 		Thread ICNThread=new Thread(ICN);
+					 		ICNThread.start();
+						}
 						
+						else
+						{}
+						
+						
+						
+						
+						//更新NowValue
 						item_list.get(i).put("Now_Value", NowValue);
-						
+				
 				 	}
 				 	
 				 	
@@ -547,6 +884,79 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     	
     };
     
+    
+    private class ChangeNumberAlert implements Runnable
+    {
+    	String ItemID;
+    	String Store;
+    	int position;
+    	public void setDate (String ItemID,String Store,int position)
+    	{
+    		this.ItemID=ItemID;
+    		this.Store=Store;
+    		this.position=position;
+    	}
+    	
+		public void run() {
+			/*
+			ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
+			nameValuePairs.add(new BasicNameValuePair("ItemID",ItemID));
+			nameValuePairs.add(new BasicNameValuePair("Store",Store));
+			nameValuePairs.add(new BasicNameValuePair("CustomID",UserIMEI));
+			String result=connect_to_server("/project/mobilephone/GetChangeNumberMatch.php",nameValuePairs);
+			Log.v("DEBUG", result);
+			
+			String[] key={"number","MateID"};
+			ArrayList<HashMap<String,String>> temp;
+			temp=json_deconde(result,key);
+			final String Number=temp.get(0).get("number");
+			*/
+			MainActivity.this.runOnUiThread(new Runnable() {
+				
+				public void run() 
+				{	
+					String Number=item_list.get(position).get("ChangeNumber");
+					AlertDialog.Builder builder=new AlertDialog.Builder(MainActivity.this);
+					builder.setTitle("商品: "+item_list.get(position).get("ItemName"));
+					builder.setMessage("收到換號要求 號碼為: "+Number+" 號");
+					builder.setPositiveButton("確認", new AlertDialog.OnClickListener() {
+						
+						public void onClick(DialogInterface dialog, int which) 
+						{
+							ImplementChangeNumber ICN=new ImplementChangeNumber();
+							ICN.setData(2,position);
+							Thread ICNThread=new Thread(ICN);
+							ICNThread.start();
+							
+						}
+					});
+					builder.setNegativeButton("拒絕", new AlertDialog.OnClickListener() {
+						
+						public void onClick(DialogInterface dialog, int which) {
+							ImplementChangeNumber ICN=new ImplementChangeNumber();
+							ICN.setData(1,position);
+							Thread ICNThread=new Thread(ICN);
+							ICNThread.start();
+							
+						}
+					});
+					AlertDialog alert = builder.create();
+					alert.show();
+					
+					
+					
+				}
+			});
+			
+		}
+    	
+    	
+    	
+    }
+    
+    
+    
+    
     public void TurnOnLocationListener()
     {
     	
@@ -560,7 +970,6 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     			criteria.setAccuracy(criteria.ACCURACY_COARSE);
     			
     			String bestProvider = locationManager.getBestProvider(criteria, true);
-    			Log.v("debug", bestProvider);
         		locationManager.requestLocationUpdates(bestProvider,0,0,this);
         		location_status=true;
         	}
@@ -614,13 +1023,14 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     	return telManager.getDeviceId();
     }
     
+    
     public void update_list(int position)
     {
     	item_list.remove(position);
     	ListView list=(ListView) findViewById(R.id.listView1);
-    	((SimpleAdapter)list.getAdapter()).notifyDataSetChanged();
+    	((ItemAdapter)list.getAdapter()).notifyDataSetChanged();
     }
-  
+    
     public boolean check_connect_status()
     {	
     	try {	
@@ -765,5 +1175,14 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		return s;
 	}
 
+	
+	
+	
 
 }
+
+
+
+
+
+

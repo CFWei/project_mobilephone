@@ -13,5 +13,7 @@
     <string name="MyNumber">我的號碼:</string>
     <string name="ChangeNumber">換號</string>
     <string name="title_activity_look_up_change_number_page">LookUpChangeNumberPage</string>
+    <string name="OwnerText">持有人:</string>
+    <string name="NumberText">號碼:</string>
 
 </resources>

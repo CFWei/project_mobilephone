@@ -24,6 +24,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
@@ -33,6 +37,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
 import android.support.v4.app.NavUtils;
 	
 public class LookUpChangeNumberPage extends Activity {
@@ -63,20 +68,48 @@ public class LookUpChangeNumberPage extends Activity {
 						ChangeNumberListView.setAdapter(new SimpleAdapter(
 														LookUpChangeNumberPage.this,
 														ChangeNumberList, 
-														android.R.layout.simple_list_item_2, 
+														R.layout.changenumberlist, 
 														new String[] { "number","CustomID" }, 
-														new int []{ android.R.id.text1, android.R.id.text2}));
+														new int []{ R.id.NumberValue, R.id.OwnerValue}));
 						
 						ChangeNumberListView.setOnItemClickListener(new OnItemClickListener() {
 
 							public void onItemClick(AdapterView<?> arg0,
 									View arg1, int arg2, long arg3) 
 							{
-							
+								
+								AlertDialog.Builder builder=new AlertDialog.Builder(LookUpChangeNumberPage.this);
+								builder.setTitle("換號確認");
+								builder.setMessage("即將送出對 "+ChangeNumberList.get(arg2).get("number")+" 號的換號申請");
+								final int position=arg2;
+								builder.setPositiveButton("確認", new OnClickListener() {
+									
+									public void onClick(DialogInterface dialog, int which) 
+									{
+										SendChangeNumberRequest SCNR=new SendChangeNumberRequest();
+										SCNR.setData(position);
+										Thread SendChangeNumberRequestThread=new Thread(SCNR);
+										SendChangeNumberRequestThread.start();
+										
+									}
+								});
+								builder.setNegativeButton("取消", new OnClickListener() {
+									
+									public void onClick(DialogInterface dialog, int which) {
+										// TODO Auto-generated method stub
+										
+									}
+								});
+								AlertDialog alert = builder.create();
+					    		alert.show();
 								
 							}
 							
 						});
+						break;
+					case 2:
+						Toast.makeText(LookUpChangeNumberPage.this, "成功發送換號請求", Toast.LENGTH_SHORT).show();
+						LookUpChangeNumberPage.this.finish();
 						break;
 				
 				}
@@ -90,15 +123,57 @@ public class LookUpChangeNumberPage extends Activity {
         
         
     }
-
+    
     @Override
-	protected void onResume() {
+	protected void onResume() 
+    {
 		// TODO Auto-generated method stub
 		super.onResume();
 		Thread GetChangeNumberListThread=new Thread(GetChangeNumberList);
 		GetChangeNumberListThread.start();
 	}
-
+    
+    private class SendChangeNumberRequest implements Runnable
+    {
+    	int position;
+    	public void setData(int position)
+    	{
+    		this.position=position;
+    	}
+    	
+		public void run() 
+		{
+			try {
+				String MatchID=ChangeNumberList.get(position).get("CustomID");
+				ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
+				nameValuePairs.add(new BasicNameValuePair("ItemID",ItemID));
+				nameValuePairs.add(new BasicNameValuePair("Store",StoreID));
+				nameValuePairs.add(new BasicNameValuePair("MatchID",MatchID));
+				nameValuePairs.add(new BasicNameValuePair("CustomID",MainActivity.UserIMEI));
+				String result=connect_to_server("/project/mobilephone/SendChangeNumberRequest.php",nameValuePairs);
+				if(result.equals("1"))
+				{
+					Log.v("debug", result);
+					Message m=threadhandler.obtainMessage(2);
+					threadhandler.sendMessage(m);
+					
+				}
+				
+				
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+    	
+    	
+    	
+    }
+    
     private Runnable GetChangeNumberList=new Runnable() 
     {	
 		public void run() 
@@ -119,6 +194,7 @@ public class LookUpChangeNumberPage extends Activity {
 				}
 				else if(!result.equals("null"))
 				{
+					Log.v("debug", result);
 					String[] key={"CustomID","number"};
 					ChangeNumberList=json_deconde(result, key);
 					Message m=threadhandler.obtainMessage(1);
