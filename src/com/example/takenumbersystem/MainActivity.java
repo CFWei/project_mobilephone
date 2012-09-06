@@ -76,6 +76,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 	private boolean ListViewSettingCheck=false;
 	public boolean connect_status=false,location_status=false;
 	ProgressDialog myDialog ;
+	ArrayList<HashMap<String,String>> MyItemList;
 	private LocationManager locationManager;
 	
 	
@@ -144,6 +145,21 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						});
 						AlertDialog alert = builder.create();
 			    		alert.show();
+						break;
+					case 8:
+						AlertDialog.Builder Dialog=new AlertDialog.Builder(MainActivity.this);
+						
+						LayoutInflater inflater = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
+						View layout = inflater.inflate(R.layout.getmyitemlayout, null);
+						
+						ListView GetMyItemListView=(ListView)layout.findViewById(R.id.GetMyItemListView);
+						GetMyItemAdapter GMIA=new GetMyItemAdapter(MainActivity.this,MyItemList);
+						GetMyItemListView.setAdapter(GMIA);
+						
+						Dialog.setView(layout);
+						Dialog.show();
+						
+						
 						break;
 				}
 			}
@@ -235,6 +251,10 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		super.onCreateContextMenu(menu, v, menuInfo);
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
 		int ItemPosition = info.position;
+		
+		if(item_list.get(ItemPosition).get("StoreType").equals("2"))
+			menu.add(0, 3, 0, "顯示我的商品");
+		
 		if(item_list.get(ItemPosition).get("ChangeNumberCheck").equals("0"))
 			menu.add(0, 0, 0, "顯示換號清單");
 		else if(item_list.get(ItemPosition).get("ChangeNumberCheck").equals("1"))
@@ -305,11 +325,64 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 	    		alert.show();
 				
 				break;
+			case 3:
+				GetMyItem GMI=new GetMyItem(ItemPosition);
+				Thread GMIThread=new Thread(GMI);
+				GMIThread.start();
+				break;
 		}
 		
 		
 		return super.onContextItemSelected(item);
 	}
+	
+	private class GetMyItem implements Runnable
+	{	
+		private int ItemPosition;
+		
+		public GetMyItem(int ItemPosition)
+		{
+			this.ItemPosition=ItemPosition;
+			
+		}
+		public void run() 
+		{
+			
+			try {
+				String ItemID=item_list.get(ItemPosition).get("item");
+				String Store=item_list.get(ItemPosition).get("store");
+				
+				ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
+				nameValuePairs.add(new BasicNameValuePair("CustomID",UserIMEI));
+				nameValuePairs.add(new BasicNameValuePair("ItemID",ItemID));
+				nameValuePairs.add(new BasicNameValuePair("Store",Store));
+		
+				String result=connect_to_server("/project/mobilephone/GetMyItem.php",nameValuePairs);
+				
+				String key[]={"NeedValue","TakenItemID","ItemName","Price"};
+				MyItemList=json_deconde(result,key);
+				
+				Message m=main_thread_handler.obtainMessage(8);
+				main_thread_handler.sendMessage(m);
+				
+				
+				
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+	}
+	
+	
 	
 	private class ImplementChangeNumber implements Runnable
 	{	
@@ -662,7 +735,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 			    	String get_item_list;
 					get_item_list = connect_to_server("/project/mobilephone/check_item.php",nameValuePairs);
 					//json decode 
-					String key[]={"custom_id","store","item","number","StoreName","ItemName","GPS_Longitude","GPS_Latitude"};
+					String key[]={"custom_id","store","item","number","StoreName","ItemName","GPS_Longitude","GPS_Latitude","StoreType"};
 					if(get_item_list!=null && !get_item_list.equals("null"))
 					{
 						item_list=json_deconde(get_item_list,key);
@@ -1175,7 +1248,51 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		return s;
 	}
 
-	
+	class GetMyItemAdapter extends BaseAdapter
+	{
+		private Context context;
+		private ArrayList<HashMap<String,String>> ItemList;
+		
+		
+		public GetMyItemAdapter(Context mcontext,ArrayList<HashMap<String,String>> mItemList)
+		{
+			context=mcontext;
+			ItemList=mItemList;
+
+		}
+		
+		public int getCount() {
+			// TODO Auto-generated method stub
+			return ItemList.size();
+		}
+
+		public Object getItem(int arg0) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public long getItemId(int arg0) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		public View getView(int arg0, View arg1, ViewGroup arg2) {
+			LayoutInflater layoutinflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View ItemView=layoutinflater.inflate(R.layout.myitemlayout, null);
+			
+			//String key[]={"NeedValue","TakenItemID","ItemName","Price"};
+			
+			TextView ItemName=(TextView)ItemView.findViewById(R.id.ItemName);
+			ItemName.setText(ItemList.get(arg0).get("ItemName"));
+			
+			TextView ItemCount=(TextView)ItemView.findViewById(R.id.ItemCount);
+			ItemCount.setText(ItemList.get(arg0).get("NeedValue"));
+			
+			return ItemView;
+		}
+		
+		
+	}
 	
 	
 

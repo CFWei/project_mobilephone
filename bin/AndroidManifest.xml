@@ -40,7 +40,11 @@
         </activity>
         <activity
             android:name=".LookUpChangeNumberPage"
-            android:screenOrientation="nosensor"  >
+            android:screenOrientation="nosensor" >
+        </activity>
+        <activity
+            android:name=".Type2ItemList"
+             android:screenOrientation="nosensor" >
         </activity>
     </application>
 

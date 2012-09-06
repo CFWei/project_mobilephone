@@ -15,5 +15,10 @@
     <string name="title_activity_look_up_change_number_page">LookUpChangeNumberPage</string>
     <string name="OwnerText">持有人:</string>
     <string name="NumberText">號碼:</string>
+    <string name="title_activity_type2_item_list">Type2ItemList</string>
+    <string name="Count">個</string>
+    <string name="EachPrice">單價:</string>
+    <string name="NeedText">需</string>
+    <string name="Submit">送出</string>
 
 </resources>

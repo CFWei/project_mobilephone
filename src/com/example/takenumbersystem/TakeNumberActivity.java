@@ -206,16 +206,9 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 					return;
 					
 				}
-				String key[]={"StoreName","StoreAddress","StoreTelephone","GPS_Longitude","GPS_Latitude","SerialNumbers","distance"};
+				String key[]={"StoreName","StoreAddress","StoreTelephone","GPS_Longitude","GPS_Latitude","SerialNumbers","distance","StoreType"};
 				
 				store_list=json_deconde(get_store_list,key);
-				for(int i=0;i<store_list.size();i++)
-					{	
-						for(int j=0;j<key.length;j++)
-						{
-						//	Log.v("item", store_list.get(i).get(key[j]));
-						}
-					}
 				if(store_list!=null)
 				{
 					final ListView store_list_view=(ListView)findViewById(R.id.store_list_view);
@@ -240,17 +233,32 @@ public class TakeNumberActivity extends Activity implements LocationListener {
 					{
 					public void onItemClick(AdapterView<?> parent,View view, int position, long id) 
 						{	
-							//設定intent轉換
-							Intent intent = new Intent();
-							intent.setClass(TakeNumberActivity.this, SelectItemActivity.class);
-							
-							//設定傳遞參數
-							Bundle bundle = new Bundle();
-							String passvalue=store_list.get(position).get("SerialNumbers");
-							bundle.putString("SerialNumbers",passvalue);
-							intent.putExtras(bundle);
-							
-							startActivityForResult(intent,getresult);
+							String StoreType=store_list.get(position).get("StoreType");
+							if(StoreType.equals("1"))
+							{
+								//設定intent轉換
+								Intent intent = new Intent();
+								intent.setClass(TakeNumberActivity.this, SelectItemActivity.class);
+								
+								//設定傳遞參數
+								Bundle bundle = new Bundle();
+								String passvalue=store_list.get(position).get("SerialNumbers");
+								bundle.putString("SerialNumbers",passvalue);
+								intent.putExtras(bundle);
+								
+								startActivityForResult(intent,getresult);
+							}
+							if(StoreType.equals("2"))
+							{
+								Intent intent=new Intent();
+								intent.setClass(TakeNumberActivity.this,Type2ItemList.class);
+								
+								Bundle bundle = new Bundle();
+								String passvalue=store_list.get(position).get("SerialNumbers");
+								bundle.putString("SerialNumbers",passvalue);
+								intent.putExtras(bundle);
+								startActivityForResult(intent,getresult);
+							}
 							
 						}
 					

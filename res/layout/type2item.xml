@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/RelativeLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/ItemName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="Sample"
+            android:textSize="30dp" />
+
+        <TextView
+            android:id="@+id/EachPriceText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/ItemName"
+            android:layout_marginLeft="15dp"
+            android:layout_toRightOf="@+id/ItemName"
+            android:text="@string/EachPrice" />
+
+        <TextView
+            android:id="@+id/EachPriceValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/EachPriceText"
+            android:layout_alignBottom="@+id/EachPriceText"
+            android:layout_toRightOf="@+id/EachPriceText" />
+
+        <TextView
+            android:id="@+id/NeedText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/multiple"
+            android:layout_alignBottom="@+id/multiple"
+            android:layout_toRightOf="@+id/multiple"
+            android:layout_marginLeft="15dp"
+            android:text="@string/NeedText" />
+
+        <TextView
+            android:id="@+id/NeedValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/NeedText"
+            android:layout_alignBottom="@+id/NeedText"
+            android:layout_toRightOf="@+id/NeedText"
+            android:layout_marginLeft="3dp"
+            android:text="" />
+
+        <TextView
+            android:id="@+id/Count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/NeedValue"
+            android:layout_alignBottom="@+id/NeedValue"
+            android:layout_toRightOf="@+id/NeedValue"
+            android:layout_marginLeft="3dp"
+            android:text="@string/Count" />
+
+        <TextView
+            android:id="@+id/Dollar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/EachPriceValue"
+            android:layout_alignBottom="@+id/EachPriceValue"
+            android:layout_toRightOf="@+id/EachPriceValue"
+            android:text="元" />
+
+        <TextView
+            android:id="@+id/multiple"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/Dollar"
+            android:layout_alignBottom="@+id/Dollar"
+            android:layout_toRightOf="@+id/Dollar"
+            android:layout_marginLeft="15dp"
+            android:text="X" />
+
+        <TextView
+            android:id="@+id/Equal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/Count"
+            android:layout_alignBottom="@+id/Count"
+            android:layout_toRightOf="@+id/Count"
+            android:layout_marginLeft="15dp"
+            android:text="=" />
+
+        <TextView
+            android:id="@+id/TotalDollar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/Equal"
+            android:layout_alignBottom="@+id/Equal"
+            android:layout_toRightOf="@+id/Equal"
+            android:layout_marginLeft="10dp"
+            android:text="" />
+		 <TextView
+            android:id="@+id/DollarS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/TotalDollar"
+            android:layout_alignBottom="@+id/TotalDollar"
+            android:layout_toRightOf="@+id/TotalDollar"
+            android:layout_marginLeft="10dp"
+            android:text="元" />
+    </RelativeLayout>
+
+</LinearLayout>
