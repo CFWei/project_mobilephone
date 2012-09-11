@@ -131,6 +131,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     	 				ListViewSettingCheck=true;
 						break;
 					case 7:
+						
 						int position=Integer.parseInt(MsgString);
 						AlertDialog.Builder builder=new AlertDialog.Builder(MainActivity.this);
 						builder.setTitle("換號成功");
@@ -144,7 +145,9 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 							}
 						});
 						AlertDialog alert = builder.create();
-			    		alert.show();
+			    		//alert.show();
+			    		 
+			    		
 						break;
 					case 8:
 						AlertDialog.Builder Dialog=new AlertDialog.Builder(MainActivity.this);
@@ -451,10 +454,9 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		       	nameValuePairs.add(new BasicNameValuePair("ItemID",ItemID));
 		    	nameValuePairs.add(new BasicNameValuePair("Store",Store));
 				String result=connect_to_server("/project/mobilephone/AcceptChangeNumber.php",nameValuePairs);
-				Log.v("debug", result);
-				if(result.equals("1"))
+				if(!result.equals("-1"))
 				{
-					
+					item_list.get(ItemPosition).put("number", result);
 					
 				}
 				
@@ -858,7 +860,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 								delete_list[delete_list_sp]=i;
 								delete_list_sp++;	
 							}
-				
+						 
 						//沒有要求換號 不做任何事
 						if(ChangeNumberCheck.equals("-1"))
 						{}
@@ -885,7 +887,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 									ChangeNumberAlertThread.start();
 									
 								}
-							
+						
 							item_list.get(i).put("ChangeNumberAlert","1");
 							item_list.get(i).put("ChangeNumberCheck","2");
 						}
@@ -893,6 +895,9 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						{
 							Message m=main_thread_handler.obtainMessage(7,String.valueOf(i));
 					 		main_thread_handler.sendMessage(m);
+					 		
+					 		Log.v("debug", ChangeNumber);
+					 		
 					 		item_list.get(i).put("ChangeNumberCheck","");
 					 		item_list.get(i).put("ChangeNumber","");
 					 		ImplementChangeNumber ICN=new ImplementChangeNumber();
@@ -925,7 +930,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 							nameValuePairs.add(new BasicNameValuePair("UserIMEI",UserIMEI));
 							connect_to_server("/project/mobilephone/del_item.php",nameValuePairs);
 							*/
-				 			item_list.remove(delete_item_num);
+				 			//item_list.remove(delete_item_num);
 				 		
 				 		}
 					
