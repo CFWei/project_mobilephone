@@ -3,117 +3,117 @@
     android:id="@+id/WaitingItemListViewLinearLayout"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:orientation="horizontal" >
 
     <RelativeLayout
-        android:id="@+id/relativeLayout2"
-        android:layout_width="match_parent"
-        android:layout_height="50dp" >
+        android:id="@+id/NumberRelativeLayout"
+        android:layout_width="94dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/StoreName"
+            android:id="@+id/MyValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+          	
+          	android:layout_centerInParent="true"
             android:text="TextView"
-            android:textSize="35dp" />
-
-		 <TextView
-		     android:id="@+id/ItemName"
-		     android:layout_width="wrap_content"
-		     android:layout_height="wrap_content"
-		     android:layout_alignBaseline="@+id/StoreName"
-		     android:layout_alignBottom="@+id/StoreName"
-		     android:layout_marginLeft="10dp"
-		     android:layout_toRightOf="@+id/StoreName"
-		     android:text="text"
-		     android:textAppearance="?android:attr/textAppearanceMedium"
-		     android:textColor="#0000FF"
-		     android:textSize="25dp" />
-
-		 <TextView
-		     android:id="@+id/alert"
-		     android:layout_width="wrap_content"
-		     android:layout_height="wrap_content"
-		     android:layout_alignParentRight="true"
-		     android:layout_centerVertical="true"
-		     android:layout_marginRight="20dp"
-		     android:text=""
-		     android:textColor="#FF0000"
-		     android:textAppearance="?android:attr/textAppearanceMedium" />
-
-		 <TextView
-		     android:id="@+id/DistanceText"
-		     android:layout_width="wrap_content"
-		     android:layout_height="wrap_content"
-		     android:layout_alignBottom="@+id/StoreName"
-		     android:layout_marginLeft="18dp"
-		     android:layout_toRightOf="@+id/ItemName"
-		     android:text="@string/distance" />
-
-		 <TextView
-		     android:id="@+id/textView5"
-		     android:layout_width="wrap_content"
-		     android:layout_height="wrap_content"
-		     android:layout_alignBottom="@+id/ItemName"
-		     android:layout_toRightOf="@+id/DistanceText"
-		     android:text="" />
-
-         <TextView
-             android:id="@+id/DistanceValue"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_alignBottom="@+id/ItemName"
-             android:layout_alignLeft="@+id/textView5"
-             android:text="TextView" />
-         <TextView
-             android:id="@+id/MeterText"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_alignBottom="@+id/ItemName"
-             android:layout_toRightOf="@+id/DistanceValue"
-             android:text="m" />
-
+            android:textSize="40dp" />
     </RelativeLayout>
-     <RelativeLayout
-        android:id="@+id/relativeLayout3"
+
+    <LinearLayout
+        android:id="@+id/WaitingInformationLayout"
         android:layout_width="match_parent"
-        android:layout_weight="0.06"
-        android:layout_height="30dp" >
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
 
-         <TextView
-             android:id="@+id/MyValueText"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:text="@string/MyNumber"
-             android:textSize="20dp" />
+        <RelativeLayout
+            android:id="@+id/NameRelativeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp" >
 
-         <TextView
-             android:id="@+id/NowValueText"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_alignParentTop="true"
-             android:layout_toLeftOf="@+id/NowValue"
-             android:text="@string/nowvalue"
-             android:textSize="20dp" />
+            <TextView
+                android:id="@+id/StoreName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+				android:layout_alignParentBottom="true"
+                android:text="TextView"
+                android:textSize="35dp" />
 
-         <TextView
-             android:id="@+id/MyValue"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_alignParentTop="true"
-             android:layout_toRightOf="@+id/MyValueText"
-             android:text="TextView"
-             android:textSize="20dp" />
+            <TextView
+                android:id="@+id/ItemName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+              	android:layout_alignParentBottom="true"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@+id/StoreName"
+                android:text="text"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#0000FF"
+                android:textSize="25dp" />
 
-         <TextView
-             android:id="@+id/NowValue"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_alignParentTop="true"
-             android:layout_alignParentRight="true"
-             android:text="TextView"
-             android:textSize="20dp" />
+            <TextView
+                android:id="@+id/alert"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="20dp"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#0f0" />
+        </RelativeLayout>
 
-    </RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/ItemInformationRelativeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_weight="0.06" >
+
+            <TextView
+                android:id="@+id/NowValueText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:text="@string/nowvalue"
+                android:textSize="15dp" />
+
+            <TextView
+                android:id="@+id/NowValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/NowValueText"
+                android:text="TextView"
+                android:textSize="15dp" />
+			
+			<TextView
+                android:id="@+id/DistanceText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+				android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/NowValue"
+                android:paddingLeft="30dp"
+                android:text="@string/distance"
+                android:textSize="15dp"  />
+			
+          	<TextView
+                android:id="@+id/DistanceValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/DistanceText"
+                android:text="TextView" />
+			<TextView
+                android:id="@+id/MeterText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/DistanceValue"
+                android:text="m" />
+			
+        </RelativeLayout>
+    </LinearLayout>
 
 </LinearLayout>

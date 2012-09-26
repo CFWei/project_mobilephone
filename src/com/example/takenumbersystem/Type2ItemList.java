@@ -36,6 +36,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -86,26 +87,68 @@ public class Type2ItemList extends Activity {
 							public void onItemClick(AdapterView<?> arg0,
 									View arg1, int arg2, long arg3) 
 							{
-								final int position=arg2;
-								AlertDialog.Builder alert = new AlertDialog.Builder(Type2ItemList.this);
-								alert.setTitle("商品:"+ItemList.get(position).get("ItemName"));
-								alert.setMessage("請輸入需要的個數");
-								final EditText input = new EditText(Type2ItemList.this);
-								input.setInputType(0x00000002);
-								alert.setView(input);
 							
-								alert.setPositiveButton("確認", new OnClickListener() {
-									
-									public void onClick(DialogInterface dialog, int which) 
-									{
-										 String value = input.getText().toString();
-										 ItemList.get(position).put("NeedValue",value);
-										 ILA.notifyDataSetChanged();
-										 
-									}
+								AlertDialog.Builder alert = new AlertDialog.Builder(Type2ItemList.this);
+
+								LayoutInflater inflater = LayoutInflater.from(Type2ItemList.this);
+								View AlertView=inflater.inflate(R.layout.inputitemnum,null);
 								
-								});
-								alert.show();		
+								Button Num1=(Button)AlertView.findViewById(R.id.Num1);
+								ImplementInput II =new ImplementInput("1",AlertView);
+								Num1.setOnClickListener(II);
+								
+								Button Num2=(Button)AlertView.findViewById(R.id.Num2);
+								II =new ImplementInput("2",AlertView);
+								Num2.setOnClickListener(II);
+								
+								Button Num3=(Button)AlertView.findViewById(R.id.Num3);
+								II =new ImplementInput("3",AlertView);
+								Num3.setOnClickListener(II);
+								
+								Button Num4=(Button)AlertView.findViewById(R.id.Num4);
+								II =new ImplementInput("4",AlertView);
+								Num4.setOnClickListener(II);
+								
+								Button Num5=(Button)AlertView.findViewById(R.id.Num5);
+								II =new ImplementInput("5",AlertView);
+								Num5.setOnClickListener(II);
+								
+								
+								Button Num6=(Button)AlertView.findViewById(R.id.Num6);
+								II =new ImplementInput("6",AlertView);
+								Num6.setOnClickListener(II);
+								
+								Button Num7=(Button)AlertView.findViewById(R.id.Num7);
+								II =new ImplementInput("7",AlertView);
+								Num7.setOnClickListener(II);
+								
+								Button Num8=(Button)AlertView.findViewById(R.id.Num8);
+								II =new ImplementInput("8",AlertView);
+								Num8.setOnClickListener(II);
+								
+								Button Num9=(Button)AlertView.findViewById(R.id.Num9);
+								II =new ImplementInput("9",AlertView);
+								Num9.setOnClickListener(II);
+								
+								Button Num0=(Button)AlertView.findViewById(R.id.Num0);
+								II =new ImplementInput("0",AlertView);
+								Num0.setOnClickListener(II);
+								
+								Button Clear=(Button)AlertView.findViewById(R.id.Clear);
+								II=new ImplementInput("Clear",AlertView);
+								Clear.setOnClickListener(II);
+								
+								Button Submit=(Button)AlertView.findViewById(R.id.Submit);
+								
+								alert.setView(AlertView);
+								AlertDialog alertDialog = alert.create();
+
+								II=new ImplementInput("Submit",AlertView);
+								II.setdata(arg2,alertDialog);
+								Submit.setOnClickListener(II);
+								
+								alertDialog.show();
+								//alert.show();		
 									
 							}
 							
@@ -140,7 +183,87 @@ public class Type2ItemList extends Activity {
         
     }
     
-    
+    class ImplementInput implements android.view.View.OnClickListener
+    {	
+    	
+    	String Num;
+    	View AlertView;
+    	int position;
+    	AlertDialog alertDialog;
+    	public ImplementInput(String Num,View AlertView)
+    	{
+    		this.Num=Num;
+    		this.AlertView=AlertView;
+    		
+    	}
+    	public void setdata(int position,AlertDialog alertDialog)
+    	{
+    		this.position=position;
+    		this.alertDialog=alertDialog;
+    		
+    	}
+    	
+    	
+		public void onClick(View v) 
+		{	
+			if(Num.equals("Clear"))
+				{
+					Clear();
+					return;
+				}
+			if(Num.equals("Submit"))
+			{
+				Submit();
+				
+				return;
+				
+			}
+			
+			TextView NumText=(TextView)AlertView.findViewById(R.id.NumberInputText);
+			
+			String Text=NumText.getText().toString();
+			String FinalText;
+			if(Text.equals("0"))
+				FinalText=Num;
+			else
+				FinalText=Text+Num;
+			
+			NumText.setText(FinalText);
+			
+		}
+    	public void Submit()
+    	{	
+    		TextView NumText=(TextView)AlertView.findViewById(R.id.NumberInputText);
+    		String Num=NumText.getText().toString();
+    		ItemList.get(position).put("NeedValue", Num);
+    		
+    		Type2ItemList.this.ILA.notifyDataSetChanged();
+    		alertDialog.dismiss();
+    		
+    		
+    	}
+		
+		
+		public void Clear()
+		{
+			TextView NumText=(TextView)AlertView.findViewById(R.id.NumberInputText);
+			String Text=NumText.getText().toString();
+			String FinalText=Text.substring(0,Text.length()-1);
+			if(FinalText.equals(""))
+			{
+				FinalText="0";
+				
+			}
+			
+			NumText.setText(FinalText);
+			
+		}
+		
+		
+    	
+    } 
+	
+	
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_type2_item_list, menu);

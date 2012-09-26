@@ -34,6 +34,8 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -79,12 +81,21 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 	ArrayList<HashMap<String,String>> MyItemList;
 	private LocationManager locationManager;
 	
+	//以下為音效參數
+	private SoundPool soundPool;
+	private int AlarmWave;
+	private static final int SOUND_COUNT = 2;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) 
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+       
+        soundPool = new SoundPool(SOUND_COUNT, AudioManager.STREAM_MUSIC,0);
+        //參數:最大音效數,聲音類型,來源品質
+        AlarmWave = this.soundPool.load(this,R.raw.doorbell,1);
+        //將音樂讀取進來
         
         UserIMEI=getIMEI();
         main_thread_handler=new Handler()
@@ -852,6 +863,13 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 								MainActivity.this.runOnUiThread(a);
 								
 								item_list.get(i).put("alert_text","到號");
+								
+								soundPool.play(AlarmWave, 1, 1, 0, 0, (float) 1.5);
+								//播放通知音效
+								// 第二、三參數分別為左右喇叭的音量，可用 0 到 1
+					            // 第四參數固定用 0
+					            // 第五個參數為播放次數，0 為不重複，-1 為無限重複
+					            // 第六個參數為播放速度，可用 0.5 到 2 
 							}
 						
 						//若商品狀態不等於未服務 則刪除此商品

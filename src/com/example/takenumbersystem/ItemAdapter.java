@@ -58,11 +58,12 @@ public class ItemAdapter extends BaseAdapter
 			{
 				lLayout.setBackgroundColor(Color.YELLOW);
 			}
-			else
+			else if(ItemList.get(arg0).containsKey("alert"))
 			{
-				
+				lLayout.setBackgroundColor(Color.MAGENTA);
 			}
-			
+			else
+			{}
 			
 			
 			
@@ -92,3 +93,17 @@ public class ItemAdapter extends BaseAdapter
 		}
 		
 	}
+
+/****
+
+         <TextView
+                android:id="@+id/textView5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/ItemName"
+                android:text="" />
+
+
+
+
+*/

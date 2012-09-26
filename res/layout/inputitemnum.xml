@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/AlertTextLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/AlertText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="請輸入商品個數"
+            android:textColor="#fff"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/NumberInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/NumberInputText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textColor="#fff"
+            android:text="0"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </RelativeLayout>
+
+    <TableLayout
+        android:id="@+id/NumberBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="10" >
+
+        <TableRow
+            android:id="@+id/tableRow1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center" >
+
+            <Button
+                android:id="@+id/Num1"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+               
+                android:text="1" />
+
+            <Button
+                android:id="@+id/Num2"
+          		android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="2" />
+
+            <Button
+                android:id="@+id/Num3"
+          		android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="3" />
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center" >
+
+            <Button
+                android:id="@+id/Num4"
+          		android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="4" />
+
+            <Button
+                android:id="@+id/Num5"
+         		android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="5" />
+
+            <Button
+                android:id="@+id/Num6"
+         		android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="6" />
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center" >
+
+            <Button
+                android:id="@+id/Num7"
+         		android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="7" />
+
+            <Button
+                android:id="@+id/Num8"
+         		android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="8" />
+
+            <Button
+                android:id="@+id/Num9"
+         		android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="9" />
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center" >
+
+            <Button
+                android:id="@+id/Clear"
+         		android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="清除" />
+
+            <Button
+                android:id="@+id/Num0"
+         		android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="0" />
+
+            <Button
+                android:id="@+id/Submit"
+         		android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="送出" />
+
+        </TableRow>
+
+    </TableLayout>
+
+</LinearLayout>
