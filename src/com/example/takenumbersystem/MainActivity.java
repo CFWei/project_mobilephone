@@ -67,7 +67,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 @SuppressLint({ "NewApi", "NewApi" })
 public class MainActivity extends Activity implements OnClickListener,LocationListener{
-	static String ServerURL="http://192.168.0.100/";
+	static String ServerURL="http://takeanumber.no-ip.info:800";
 	private static final double EARTH_RADIUS = 6378137;
 	public static String UserIMEI;
 	public ArrayList<HashMap<String,String>> item_list=null;
@@ -927,9 +927,6 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						else
 						{}
 						
-						
-						
-						
 						//更新NowValue
 						item_list.get(i).put("Now_Value", NowValue);
 				
@@ -948,7 +945,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 							nameValuePairs.add(new BasicNameValuePair("UserIMEI",UserIMEI));
 							connect_to_server("/project/mobilephone/del_item.php",nameValuePairs);
 							*/
-				 			//item_list.remove(delete_item_num);
+				 			item_list.remove(delete_item_num);
 				 		
 				 		}
 					
