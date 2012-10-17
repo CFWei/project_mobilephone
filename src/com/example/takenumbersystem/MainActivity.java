@@ -874,10 +874,10 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						
 						//若商品狀態不等於未服務 則刪除此商品
 						if(!ItemLife.equals("0"))
-							{
+						{
 								delete_list[delete_list_sp]=i;
 								delete_list_sp++;	
-							}
+						}
 						 
 						//沒有要求換號 不做任何事
 						if(ChangeNumberCheck.equals("-1"))

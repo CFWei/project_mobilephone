@@ -74,8 +74,12 @@ public class ItemAdapter extends BaseAdapter
 			TextView MyValue=(TextView)ItemView.findViewById(R.id.MyValue);
 			MyValue.setText(ItemList.get(arg0).get("number"));
 			
+			
 			TextView ItemName=(TextView)ItemView.findViewById(R.id.ItemName);
-			ItemName.setText(ItemList.get(arg0).get("ItemName"));
+			if(!ItemList.get(arg0).get("ItemName").equals("TYPE2"))
+				ItemName.setText(ItemList.get(arg0).get("ItemName"));
+			else
+				ItemName.setText("");
 			
 			TextView NowValue=(TextView)ItemView.findViewById(R.id.NowValue);
 			NowValue.setText(ItemList.get(arg0).get("Now_Value"));
