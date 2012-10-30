@@ -797,8 +797,10 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 					{
 						Message m=main_thread_handler.obtainMessage(4,"目前沒有商品");
 				 		main_thread_handler.sendMessage(m);
+				 		
+				 		
 				 		m=main_thread_handler.obtainMessage(3);
-						 main_thread_handler.sendMessage(m);
+						main_thread_handler.sendMessage(m);
 					}
 					
 					
@@ -1054,9 +1056,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     {
     	
         locationManager=(LocationManager)getSystemService(LOCATION_SERVICE);
-        
-
-        
+    
         if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)&&locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
         	{	
         		Criteria criteria = new Criteria();
