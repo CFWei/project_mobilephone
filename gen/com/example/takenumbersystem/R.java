@@ -81,12 +81,13 @@ public final class R {
         public static final int SubmitButton=0x7f09000e;
         public static final int TotalDollar=0x7f090043;
         public static final int Type2ItemListView=0x7f09000c;
+        public static final int WaitItemName=0x7f090052;
         public static final int WaitingInformationLayout=0x7f090048;
         public static final int WaitingItemListViewLinearLayout=0x7f090045;
         public static final int alert=0x7f09004b;
         public static final int distance=0x7f090036;
         public static final int listView1=0x7f090003;
-        public static final int menu_settings=0x7f090052;
+        public static final int menu_settings=0x7f090053;
         public static final int meter=0x7f090038;
         public static final int multiple=0x7f09003e;
         public static final int nowvalue=0x7f09002f;
@@ -118,6 +119,7 @@ public final class R {
         public static final int storelistview=0x7f03000a;
         public static final int type2item=0x7f03000b;
         public static final int waitingitemistview=0x7f03000c;
+        public static final int waititemlist=0x7f03000d;
     }
     public static final class menu {
         public static final int activity_look_up_change_number_page=0x7f080000;
