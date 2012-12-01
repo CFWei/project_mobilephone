@@ -6,7 +6,7 @@
     android:orientation="vertical" >
 
     <RelativeLayout
-        android:id="@+id/AlertTextLayout"
+        android:id="@+id/AlertTextLayout1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
@@ -19,8 +19,24 @@
             android:text="請輸入商品個數"
             android:textColor="#fff"
             android:textAppearance="?android:attr/textAppearanceMedium" />
-    </RelativeLayout>
 
+    </RelativeLayout>
+	<RelativeLayout
+        android:id="@+id/AlertTextLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+    
+	     <TextView
+            android:id="@+id/LimitQuantityNum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text=""
+            android:textColor="#fff"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+	    
+    </RelativeLayout>
     <RelativeLayout
         android:id="@+id/NumberInputLayout"
         android:layout_width="match_parent"

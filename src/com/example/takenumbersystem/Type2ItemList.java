@@ -20,6 +20,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.example.takenumbersystem.MainActivity.GetMyItemAdapter;
+
+import android.R.integer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -93,6 +96,9 @@ public class Type2ItemList extends Activity {
 								LayoutInflater inflater = LayoutInflater.from(Type2ItemList.this);
 								View AlertView=inflater.inflate(R.layout.inputitemnum,null);
 								
+								TextView LimitQuantityNum=(TextView)AlertView.findViewById(R.id.LimitQuantityNum);
+								LimitQuantityNum.setText("(數量上限:"+ItemList.get(arg2).get("LimitQuantity")+")");
+								
 								Button Num1=(Button)AlertView.findViewById(R.id.Num1);
 								ImplementInput II =new ImplementInput("1",AlertView);
 								Num1.setOnClickListener(II);
@@ -139,7 +145,6 @@ public class Type2ItemList extends Activity {
 								Clear.setOnClickListener(II);
 								
 								Button Submit=(Button)AlertView.findViewById(R.id.Submit);
-								
 								alert.setView(AlertView);
 								AlertDialog alertDialog = alert.create();
 
@@ -172,8 +177,59 @@ public class Type2ItemList extends Activity {
 			
 			public void onClick(View v) 
 			{	
-				Thread SubmitDataThread=new Thread(SubmitData);
-				SubmitDataThread.start();
+				AlertDialog.Builder Dialog=new AlertDialog.Builder(Type2ItemList.this);
+				LayoutInflater inflater = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
+				View layout = inflater.inflate(R.layout.getmyitemlayout, null);
+				
+				int totalcost=0;
+				
+				ArrayList<HashMap<String,String>> TempItemList=new ArrayList<HashMap<String,String>>();
+				for(int i=0;i<ItemList.size();i++){
+					if(!ItemList.get(i).get("NeedValue").equals("0"))
+					{
+						HashMap<String, String> temp = ItemList.get(i);
+						//temp.put("ItemName", ItemList.get(i).get("ItemName"));
+						//temp.put("NeedValue", ItemList.get(i).get("NeedValue"));
+						//temp.put("TakenItemID", ItemList.get(i).get("TakenItemID"));
+						//temp.put("Price", ItemList.get(i).get("Price"));
+						TempItemList.add(temp);
+						int eachcost=Integer.parseInt(ItemList.get(i).get("Price"));
+						int needvalue=Integer.parseInt(ItemList.get(i).get("NeedValue"));
+						totalcost+=eachcost*needvalue;
+						
+					}
+					
+				}
+				
+		
+				ListView GetMyItemListView=(ListView)layout.findViewById(R.id.GetMyItemListView);
+				GetMyItemAdapter GMIA=new GetMyItemAdapter(Type2ItemList.this,TempItemList);
+				GetMyItemListView.setAdapter(GMIA);
+		
+				TextView TotalCost=(TextView)layout.findViewById(R.id.TotoalCost);
+				TotalCost.setText(String.valueOf(totalcost));
+				
+				Dialog.setView(layout);
+				Dialog.setPositiveButton("確認", new OnClickListener() {
+					
+					public void onClick(DialogInterface dialog, int which) {
+						Thread SubmitDataThread=new Thread(SubmitData);
+						SubmitDataThread.start();
+						
+					}
+				});
+				
+				Dialog.setNegativeButton("取消", new OnClickListener() {
+					
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				
+				Dialog.show();
+				
+	
 				
 			}
 		});
@@ -235,10 +291,23 @@ public class Type2ItemList extends Activity {
     	{	
     		TextView NumText=(TextView)AlertView.findViewById(R.id.NumberInputText);
     		String Num=NumText.getText().toString();
-    		ItemList.get(position).put("NeedValue", Num);
+    		String LimitQuantity=ItemList.get(position).get("LimitQuantity");
     		
-    		Type2ItemList.this.ILA.notifyDataSetChanged();
-    		alertDialog.dismiss();
+    		int IntLimitQuantity=Integer.parseInt(LimitQuantity);
+    		int IntNum=Integer.parseInt(Num);
+    		
+    		
+    		if(IntNum<=IntLimitQuantity){
+    			ItemList.get(position).put("NeedValue", Num);
+    			Type2ItemList.this.ILA.notifyDataSetChanged();
+    			alertDialog.dismiss();
+    		}
+    		else{
+    			Toast.makeText(Type2ItemList.this,"此商品數量上限:"+LimitQuantity,Toast.LENGTH_SHORT).show();
+    			
+    			
+    		}
+    		
     		
     		
     	}
@@ -304,12 +373,26 @@ public class Type2ItemList extends Activity {
 			nameValuePairs.add(new BasicNameValuePair("UserIMEI",MainActivity.UserIMEI));
 			try {
 				String result=connect_to_server("/project/mobilephone/Type2TakeNumber.php",nameValuePairs);
-				Message m=MainThreadHandler.obtainMessage(1,"抽號成功");
+				String returnString="";
+				if(result.equals("1")){
+					returnString="抽號成功";
+					
+					
+				}
+				else if(result.equals("-2")){
+					
+					returnString="抽號失敗,請勿重複抽號";
+					
+				}
+				else{
+					returnString="抽號失敗";
+				}
+				Message m=MainThreadHandler.obtainMessage(1,returnString);
 				MainThreadHandler.sendMessage(m);
 				
 				m=MainThreadHandler.obtainMessage(3);
 				MainThreadHandler.sendMessage(m);
-				
+
 			} catch (ClientProtocolException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -392,7 +475,7 @@ public class Type2ItemList extends Activity {
 				nameValuePairs.add(new BasicNameValuePair("SerialNumbers",SerialNumbers));
 				String result=connect_to_server("/project/mobilephone/Type2GetItemList.php",nameValuePairs);
 				
-				String key[]={"ItemName","Price","TakenItemID"};
+				String key[]={"ItemName","Price","TakenItemID","LimitQuantity"};
 				ItemList=json_deconde(result,key);
 				
 				for(int i=0;i<ItemList.size();i++)
@@ -464,5 +547,54 @@ public class Type2ItemList extends Activity {
 		return item;
     	
     }
+	
+	class GetMyItemAdapter extends BaseAdapter
+	{
+		private Context context;
+		private ArrayList<HashMap<String,String>> ItemList;
+		
+		
+		public GetMyItemAdapter(Context mcontext,ArrayList<HashMap<String,String>> mItemList)
+		{
+			context=mcontext;
+			ItemList=mItemList;
+
+		}
+		
+		public int getCount() {
+			// TODO Auto-generated method stub
+			return ItemList.size();
+		}
+
+		public Object getItem(int arg0) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public long getItemId(int arg0) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		public View getView(int arg0, View arg1, ViewGroup arg2) {
+			LayoutInflater layoutinflater=(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View ItemView=layoutinflater.inflate(R.layout.myitemlayout, null);
+			
+			//String key[]={"NeedValue","TakenItemID","ItemName","Price"};
+			
+			TextView ItemName=(TextView)ItemView.findViewById(R.id.ItemName);
+			ItemName.setText(ItemList.get(arg0).get("ItemName"));
+			
+			TextView ItemCount=(TextView)ItemView.findViewById(R.id.ItemCount);
+			ItemCount.setText("共"+ItemList.get(arg0).get("NeedValue")+"個");
+			
+			TextView EachPrice=(TextView)ItemView.findViewById(R.id.EachPrice);
+			EachPrice.setText(ItemList.get(arg0).get("Price"));
+			
+			return ItemView;
+		}
+		
+		
+	}
     
 }

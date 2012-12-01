@@ -21,6 +21,52 @@
 
     </RelativeLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:background="@drawable/border1"
+            
+            android:layout_weight="1" >
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="商品名稱" />
+            
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:background="@drawable/border1"
+            android:layout_weight="1" >
+                   <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="數量" />
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:background="@drawable/border1"
+            android:layout_weight="1" >
+          <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="單價" />
+        </RelativeLayout>
+        
+    </LinearLayout>
+
     <ListView
         android:id="@+id/GetMyItemListView"
         android:layout_width="match_parent"
@@ -33,11 +79,18 @@
         android:background="#ccc" >
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/TotoalCostText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
          	android:textSize="20dp"
             android:text="總金額:" />
+       <TextView
+            android:id="@+id/TotoalCost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/TotoalCostText"
+         	android:textSize="20dp"
+            android:text="" />
 
     </RelativeLayout>
 

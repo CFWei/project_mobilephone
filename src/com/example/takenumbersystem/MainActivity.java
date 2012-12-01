@@ -170,6 +170,17 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						GetMyItemAdapter GMIA=new GetMyItemAdapter(MainActivity.this,MyItemList);
 						GetMyItemListView.setAdapter(GMIA);
 						
+						int totalcost=0;
+						for(int i=0;i<MyItemList.size();i++){
+							int eachcost=Integer.parseInt(MyItemList.get(i).get("Price"));
+							int needvalue=Integer.parseInt(MyItemList.get(i).get("NeedValue"));
+							totalcost+=eachcost*needvalue;
+							
+						}
+						
+						TextView TotalCost=(TextView)layout.findViewById(R.id.TotoalCost);
+						TotalCost.setText(String.valueOf(totalcost));
+						
 						Dialog.setView(layout);
 						Dialog.show();
 						
@@ -284,7 +295,10 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 		else if(item_list.get(ItemPosition).get("ChangeNumberCheck").equals("3"))
 		{}
 		else
-			menu.add(0, 0, 0, "進入換號系統");
+			{
+			//menu.add(0, 0, 0, "進入換號系統");
+			}
+			
 		
 		
 
@@ -1306,7 +1320,10 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 			ItemName.setText(ItemList.get(arg0).get("ItemName"));
 			
 			TextView ItemCount=(TextView)ItemView.findViewById(R.id.ItemCount);
-			ItemCount.setText(ItemList.get(arg0).get("NeedValue"));
+			ItemCount.setText("共"+ItemList.get(arg0).get("NeedValue")+"個");
+			
+			TextView EachPrice=(TextView)ItemView.findViewById(R.id.EachPrice);
+			EachPrice.setText(ItemList.get(arg0).get("Price"));
 			
 			return ItemView;
 		}
