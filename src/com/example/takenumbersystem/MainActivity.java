@@ -740,7 +740,19 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
         return true;
     }
     
-    public void onClick(View arg0) 
+	
+	
+    @Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		// TODO Auto-generated method stub
+    	
+    	//目前只有一個選項所以直接執行
+    	   startActivity(new Intent(this, settingActivity.class));
+    	
+		return super.onMenuItemSelected(featureId, item);
+	}
+
+	public void onClick(View arg0) 
     {
     	if(arg0.getId()==R.id.takenumber)
     		{

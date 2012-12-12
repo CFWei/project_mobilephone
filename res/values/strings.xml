@@ -20,5 +20,7 @@
     <string name="EachPrice">單價:</string>
     <string name="NeedText">需</string>
     <string name="Submit">送出</string>
+    <string name="title_activity_preference">PreferenceActivity</string>
+    <string name="title_activity_setting">settingActivity</string>
 
 </resources>

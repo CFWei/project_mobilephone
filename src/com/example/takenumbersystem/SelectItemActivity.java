@@ -23,8 +23,10 @@ import org.json.JSONObject;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.preference.PreferenceManager;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -173,11 +175,15 @@ public class SelectItemActivity extends Activity {
     		UserIMEI=getUserIMEI;
 		}
 		public void run() 
-		{
+		{	
+			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SelectItemActivity.this);
+			String phoneNubmer=preferences.getString("PhoneNumber", "");
+			
 			ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
 			nameValuePairs.add(new BasicNameValuePair("ItemId",ItemId));
 			nameValuePairs.add(new BasicNameValuePair("SerialNumbers",SerialNumbers));
 			nameValuePairs.add(new BasicNameValuePair("UserIMEI",UserIMEI));
+			nameValuePairs.add(new BasicNameValuePair("phoneNubmer",phoneNubmer));
 			
 			String result;
 			try {

@@ -26,12 +26,14 @@ import android.R.integer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -49,6 +51,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.NavUtils;
+import android.telephony.TelephonyManager;
 
 public class Type2ItemList extends Activity {
 	
@@ -215,6 +218,7 @@ public class Type2ItemList extends Activity {
 					public void onClick(DialogInterface dialog, int which) {
 						Thread SubmitDataThread=new Thread(SubmitData);
 						SubmitDataThread.start();
+
 						
 					}
 				});
@@ -238,7 +242,8 @@ public class Type2ItemList extends Activity {
         GILThread.start();
         
     }
-    
+	
+	
     class ImplementInput implements android.view.View.OnClickListener
     {	
     	
@@ -344,6 +349,7 @@ public class Type2ItemList extends Activity {
 		
 		public void run() 
 		{	
+			
 			ArrayList<HashMap<String,String>> SendList=new ArrayList<HashMap<String,String>>();
 			JSONObject jsonList=new JSONObject();
 			for(int i=0;i<ItemList.size();i++)
@@ -366,11 +372,17 @@ public class Type2ItemList extends Activity {
 					
 				}
 			}
-		
+			
+			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Type2ItemList.this);
+			String phoneNubmer=preferences.getString("PhoneNumber", "");
+			
+			
 			ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
 			nameValuePairs.add(new BasicNameValuePair("SerialNumbers",SerialNumbers));
 			nameValuePairs.add(new BasicNameValuePair("CustomItemList",jsonList.toString()));
 			nameValuePairs.add(new BasicNameValuePair("UserIMEI",MainActivity.UserIMEI));
+			nameValuePairs.add(new BasicNameValuePair("phoneNubmer",phoneNubmer));
+			
 			try {
 				String result=connect_to_server("/project/mobilephone/Type2TakeNumber.php",nameValuePairs);
 				String returnString="";
