@@ -182,6 +182,13 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 						TotalCost.setText(String.valueOf(totalcost));
 						
 						Dialog.setView(layout);
+						Dialog.setPositiveButton("確定", new DialogInterface.OnClickListener() {
+							
+							public void onClick(DialogInterface dialog, int which) {
+								
+								
+							}
+						});
 						Dialog.show();
 						
 						
@@ -274,6 +281,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 			ContextMenuInfo menuInfo) {
 		
 		super.onCreateContextMenu(menu, v, menuInfo);
+		
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
 		int ItemPosition = info.position;
 		
@@ -745,11 +753,15 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     @Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		// TODO Auto-generated method stub
-    	
-    	//目前只有一個選項所以直接執行
-    	   startActivity(new Intent(this, settingActivity.class));
-    	
-		return super.onMenuItemSelected(featureId, item);
+    	super.onMenuItemSelected(featureId, item);
+    	switch(item.getItemId())
+    	{
+    		case R.id.menu_settings:
+    			startActivity(new Intent(this, settingActivity.class));
+    	}
+		return true;
+		//目前只有一個選項所以直接執行
+		
 	}
 
 	public void onClick(View arg0) 
@@ -1120,7 +1132,10 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
     	  public void run() 
     	  {
     		  AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-    		  builder.setMessage(StoreName+":"+ItemName);
+    		  if(ItemName.equals("TYPE2"))
+    			  builder.setMessage(StoreName);
+    		  else
+    			  builder.setMessage(StoreName+":"+ItemName);
     		  builder.setTitle("到號通知");
     		  DialogInterface.OnClickListener okclick=new DialogInterface.OnClickListener()
     		  {

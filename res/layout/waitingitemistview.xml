@@ -40,17 +40,6 @@
 				android:layout_centerInParent="true"
                 android:text="TextView"
                 android:textSize="35dp" />
-
-            <TextView
-                android:id="@+id/alert"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="20dp"
-                android:text=""
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="#0f0" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -67,6 +56,15 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="#0000FF"
                 android:textSize="25dp" />
+
+            <TextView
+                android:id="@+id/alert"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#0f0" />
 
         </RelativeLayout>
 
