@@ -189,8 +189,11 @@ public class SelectItemActivity extends Activity {
 			try {
 				result = connect_to_server("/project/mobilephone/take_number.php",nameValuePairs);
 				
+				if(result.equals("-1")){
+					toast("抽號失敗,已有相同商品在抽號等待");
+				}
 				
-				if(!result.equals("fail")&&!result.equals("MySQL Query Error"))
+				else if(!result.equals("fail")&&!result.equals("MySQL Query Error"))
 					{
 						toast("你現在抽到的號碼是:"+result);
 						setResult(RESULT_OK);

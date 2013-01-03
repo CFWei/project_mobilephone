@@ -38,6 +38,7 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -307,6 +308,7 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 			//menu.add(0, 0, 0, "進入換號系統");
 			}
 			
+		menu.add(0, 4, 0, "刪除");
 		
 		
 
@@ -366,11 +368,65 @@ public class MainActivity extends Activity implements OnClickListener,LocationLi
 				Thread GMIThread=new Thread(GMI);
 				GMIThread.start();
 				break;
+			case 4:
+				new DeleteItem().execute(ItemPosition);
+				break;
 		}
 		
 		
 		return super.onContextItemSelected(item);
 	}
+	
+	
+	private class DeleteItem extends AsyncTask<Integer, Void, String>{
+		
+		
+		@Override
+		protected String doInBackground(Integer... params) {
+			int ItemPosition=params[0];
+			
+			String ItemID=item_list.get(ItemPosition).get("item");
+			String Store=item_list.get(ItemPosition).get("store");
+			String Value=item_list.get(ItemPosition).get("number");
+			String StoreType=item_list.get(ItemPosition).get("StoreType");
+					
+			ArrayList<NameValuePair> nameValuePairs =new ArrayList<NameValuePair>();
+	    	nameValuePairs.add(new BasicNameValuePair("CustomID",UserIMEI));
+	       	nameValuePairs.add(new BasicNameValuePair("ItemID",ItemID));
+	    	nameValuePairs.add(new BasicNameValuePair("Store",Store));
+	    	nameValuePairs.add(new BasicNameValuePair("Value",Value));
+	    	nameValuePairs.add(new BasicNameValuePair("StoreType",StoreType));
+	    	
+	    	
+			try {
+				String result=connect_to_server("/project/mobilephone/DeleteItem.php",nameValuePairs);
+				Log.v("debug", result);
+			} catch (ClientProtocolException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(String result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			
+			
+			
+		}
+
+		
+		
+		
+		
+		
+	} 
+
+	
 	
 	private class GetMyItem implements Runnable
 	{	
